@@ -1,0 +1,2045 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>WellTrack - Dashboard Pelacak Kebiasaan &amp; Kesehatan</title>
+  <!-- Load Tailwind CSS v3 with forms & container queries plugins -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <!-- Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf9',
+              100: '#ccfbf1',
+              200: '#99f6e4',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+              800: '#115e59',
+              900: '#064e3b',
+              dark: '#033928',
+              deep: '#032c20'
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'Segoe UI', 'Roboto', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Custom Styles for Circular Progress and Layout Details -->
+  <style data-purpose="custom-layout">
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #034833; /* Dark green outer border/frame as seen in reference */
+    }
+
+    /* Custom circular gauge progress styling */
+    .conic-water {
+      background: conic-gradient(#0d9488 0% 72%, #e2e8f0 72% 100%);
+      transition: background 0.5s ease;
+    }
+
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+
+    /* Modal Backdrop Transitions */
+    .modal-backdrop {
+      background-color: rgba(3, 44, 32, 0.6);
+      backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
+<body class="p-2 md:p-3 flex justify-center items-stretch min-h-screen text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
+
+<!-- BEGIN: MainContainer -->
+<div class="w-full max-w-[1440px] bg-slate-50 rounded-2xl md:rounded-3xl shadow-2xl flex overflow-hidden border border-emerald-950/20 relative">
+
+  <!-- BEGIN: LeftSidebar -->
+  <aside class="w-60 md:w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between shrink-0 py-5 px-4 select-none" data-purpose="sidebar-navigation">
+    <!-- Top Sidebar Block: Logo, Primary Action, Menu -->
+    <div class="space-y-6">
+      <!-- Logo -->
+      <div class="flex items-center gap-2.5 px-2 cursor-pointer" onclick="loadDashboardData()">
+        <div class="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center text-white shadow-sm shadow-teal-600/30">
+          <svg class="w-5 h-5 fill-current" viewbox="0 0 24 24">
+            <path d="M19 10.5h-4.5V6a1.5 1.5 0 0 0-3 0v4.5H7a1.5 1.5 0 0 0 0 3h4.5V18a1.5 1.5 0 0 0 3 0v-4.5H19a1.5 1.5 0 0 0 0-3z"></path>
+            <path d="M4 12a1 1 0 0 1 1-1h1.5l1.2-2.4a1 1 0 0 1 1.8.1L11.4 13l1.8-3.6a1 1 0 0 1 1.8.1L16.2 11H19a1 1 0 1 1 0 2h-3.5a1 1 0 0 1-.9-.6L13.4 9.8l-1.8 3.6a1 1 0 0 1-1.8-.1L8.1 11H5a1 1 0 0 1-1-1z" opacity="0.3"></path>
+          </svg>
+        </div>
+        <span class="text-xl font-bold tracking-tight text-slate-900">Well<span class="text-teal-700">Track</span></span>
+      </div>
+
+      <!-- Primary CTA Button -->
+      <div>
+        <button onclick="scrollToQuickLog()" class="w-full bg-[#064e3b] hover:bg-[#043d2e] text-white py-2.5 px-4 rounded-xl font-semibold text-xs md:text-sm flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98]">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 8v8m-4-4h8"></path>
+          </svg>
+          <span>Update Progres</span>
+        </button>
+      </div>
+
+      <!-- Navigation Menu Links -->
+      <nav class="space-y-1 text-[13px] font-medium text-slate-600">
+        <!-- Active: Dashboard / Overview -->
+        <a id="navDashboard" onclick="switchNavView('dashboard')" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-teal-800 text-white font-semibold shadow-sm transition cursor-pointer" href="javascript:void(0)">
+          <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+            <rect height="7" rx="1.5" width="7" x="3" y="3"></rect>
+            <rect height="7" rx="1.5" width="7" x="14" y="3"></rect>
+            <rect height="7" rx="1.5" width="7" x="14" y="14"></rect>
+            <rect height="7" rx="1.5" width="7" x="3" y="14"></rect>
+          </svg>
+          <span>Dashboard / Overview</span>
+        </a>
+        <!-- Analytics & Progress -->
+        <a id="navAnalytics" onclick="openAnalyticsModal()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer" href="javascript:void(0)">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+            <path d="M3 3v18h18"></path>
+            <path d="m19 9-5 5-4-4-3 3"></path>
+          </svg>
+          <span>Analytics &amp; Progress</span>
+        </a>
+        <!-- Habits & Goals -->
+        <a id="navHabits" onclick="openHabitsModal()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer" href="javascript:void(0)">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="m9 12 2 2 4-4"></path>
+          </svg>
+          <span>Habits &amp; Goals</span>
+        </a>
+        <!-- Gamification & Rewards -->
+        <a id="navGamification" onclick="openGamificationModal()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer" href="javascript:void(0)">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.45 1-1 1H8v4h8v-4h-1c-.55 0-1-.45-1-1v-2.34c3.08-.63 5.4-3.37 5.4-6.66V4H4.6v4c0 3.29 2.32 6.03 5.4 6.66z"></path>
+          </svg>
+          <span>Gamification &amp; Rewards</span>
+        </a>
+        <!-- Settings -->
+        <a id="navSettings" onclick="openSettingsModal()" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer" href="javascript:void(0)">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Bottom Actions: Test Auth Link & Logout -->
+    <div class="pt-4 border-t border-slate-100 space-y-2">
+      <a href="javascript:void(0)" onclick="goToTestAuth()" id="linkTestAuth" class="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-500 hover:text-teal-700 hover:bg-teal-50 rounded-xl transition">
+        <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+          <path d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7c-2 0-3 1-3 3z"></path>
+          <path d="M9 12h6m-3-3v6"></path>
+        </svg>
+        <span>Test Portal DB</span>
+      </a>
+      <button onclick="handleLogout()" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" x2="9" y1="12" y2="12"></line>
+        </svg>
+        <span>Keluar</span>
+      </button>
+    </div>
+  </aside>
+  <!-- END: LeftSidebar -->
+
+  <!-- BEGIN: MainContentArea -->
+  <main class="flex-1 flex flex-col overflow-y-auto bg-[#f8fafc]">
+    <!-- BEGIN: TopHeader -->
+    <header class="h-16 bg-white border-b border-slate-200/80 px-6 flex items-center justify-between shrink-0 sticky top-0 z-20" data-purpose="top-header">
+      <!-- Search Input Bar -->
+      <div class="relative w-72 md:w-80">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" x2="16.65" y1="21" x2="16.65"></line>
+          </svg>
+        </span>
+        <input id="searchInput" oninput="filterHabits(this.value)" class="w-full pl-9 pr-4 py-2 text-xs bg-[#f1f5f9] border border-transparent rounded-full text-slate-700 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition" placeholder="Cari kebiasaan atau aktivitas..." type="text"/>
+      </div>
+
+      <!-- Header Actions: DB Status, Streak Badge, Notifications, User Profile -->
+      <div class="flex items-center gap-3 md:gap-4">
+        <!-- DB Health Status Dot -->
+        <div id="headerDbStatus" title="Status koneksi Neon PostgreSQL" class="hidden sm:flex items-center gap-1.5 text-[11px] font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
+          <span id="dbDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          <span id="dbStatusLabel">Neon DB</span>
+        </div>
+
+        <!-- Streak Pill -->
+        <div onclick="openGamificationModal()" class="flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 px-3 py-1 rounded-full text-xs font-semibold shadow-xs cursor-pointer hover:bg-amber-100 transition">
+          <svg class="w-3.5 h-3.5 fill-amber-500" viewbox="0 0 20 20">
+            <path clip-rule="evenodd" d="M12.395 2.553a1 1 0 0 0-1.45-.385c-.345.23-.614.558-.822.88-.527.82-1.124 1.954-1.632 3.123C7.57 8.214 7 10.428 7 12a5 5 0 0 0 10 0c0-1.78-.908-3.41-1.848-4.733-.507-.714-1.07-1.41-1.583-2.035a14.28 14.28 0 0 0-1.174-1.282v-.397zm-1.082 8.795a1 1 0 0 1 1.414 0 3 3 0 0 1 .887 2.122 3 3 0 0 1-6 0c0-.85.35-1.63.92-2.19l.78-.73a1 1 0 0 1 1.414.152l.585.646z" fill-rule="evenodd"></path>
+          </svg>
+          <span id="topStreakText">0 Hari Streak</span>
+        </div>
+
+        <!-- Notification Bell -->
+        <button onclick="showToast('Fitur Notifikasi dijadwalkan pada Fase berikutnya per PRD Bagian 4.3 (Ditunda).', 'info')" class="relative p-2 rounded-full text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition" title="Notifikasi (Fase Berikutnya)">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-teal-500 rounded-full"></span>
+        </button>
+
+        <!-- User Profile -->
+        <div onclick="openSettingsModal()" class="flex items-center gap-2.5 pl-2 border-l border-slate-200 cursor-pointer hover:opacity-90 transition">
+          <!-- Avatar -->
+          <div id="userAvatar" class="w-8 h-8 rounded-full bg-teal-700 text-white font-bold text-xs flex items-center justify-center ring-2 ring-emerald-500/20 shadow-xs">
+            U
+          </div>
+          <div class="text-left text-xs leading-tight">
+            <div class="font-semibold text-slate-800 flex items-center gap-1">
+              <span id="headerUserName">Memuat...</span>
+              <svg class="w-3 h-3 text-teal-600 fill-current" viewbox="0 0 20 20">
+                <path clip-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm3.707-9.293a1 1 0 0 0-1.414-1.414L9 10.586 7.707 9.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4z" fill-rule="evenodd"></path>
+              </svg>
+            </div>
+            <span id="headerUserPoints" class="text-[10px] text-teal-600 font-semibold">0 Poin</span>
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- END: TopHeader -->
+
+    <!-- Scrollable Main Content -->
+    <div class="p-4 md:p-6 space-y-6">
+
+      <!-- BEGIN: HeroBanner -->
+      <section class="rounded-2xl p-5 md:p-6 bg-gradient-to-r from-emerald-100/90 via-teal-50 to-emerald-100/60 border border-teal-200/60 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5" data-purpose="hero-banner">
+        <!-- Text Greeting -->
+        <div class="space-y-2 max-w-xl">
+          <div class="flex items-center gap-2 text-[11px] font-semibold text-teal-800">
+            <span class="bg-teal-200/70 text-teal-900 px-2 py-0.5 rounded uppercase tracking-wider font-bold text-[10px]">Vitality Pulse v1.0</span>
+            <span>•</span>
+            <span class="flex items-center gap-1" id="currentDateString">
+              <svg class="w-3.5 h-3.5 text-teal-700" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="18" rx="2" ry="2" width="18" x="3" y="4"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg>
+              Memuat tanggal...
+            </span>
+          </div>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight" id="heroGreeting">
+            Selamat datang kembali!
+          </h1>
+          <p class="text-xs md:text-sm text-slate-600 leading-relaxed">
+            "Konsistensi kecil hari ini adalah pondasi energi tak terbatas esok hari." Tubuh Anda berada dalam ritme optimal!
+          </p>
+        </div>
+
+        <!-- Weekly Streak Claim Card -->
+        <div class="bg-white/90 backdrop-blur rounded-xl p-3.5 border border-emerald-200/80 shadow-sm flex items-center gap-3.5 shrink-0">
+          <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+            <svg class="w-5 h-5 fill-current" viewbox="0 0 20 20">
+              <path clip-rule="evenodd" d="M12.395 2.553a1 1 0 0 0-1.45-.385c-.345.23-.614.558-.822.88-.527.82-1.124 1.954-1.632 3.123C7.57 8.214 7 10.428 7 12a5 5 0 0 0 10 0c0-1.78-.908-3.41-1.848-4.733-.507-.714-1.07-1.41-1.583-2.035a14.28 14.28 0 0 0-1.174-1.282v-.397zm-1.082 8.795a1 1 0 0 1 1.414 0 3 3 0 0 1 .887 2.122 3 3 0 0 1-6 0c0-.85.35-1.63.92-2.19l.78-.73a1 1 0 0 1 1.414.152l.585.646z" fill-rule="evenodd"></path>
+            </svg>
+          </div>
+          <div class="text-xs">
+            <div class="font-bold text-slate-800 flex items-center gap-1.5">
+              <span id="heroStreakTitle">7 Hari Beruntun!</span>
+              <span class="text-[10px] text-amber-600 font-bold bg-amber-50 px-1 py-0.2 rounded">+150 XP</span>
+            </div>
+            <p class="text-[11px] text-slate-500" id="heroStreakSubtitle">Bonus konsistensi mingguan siap klaim</p>
+          </div>
+          <button id="btnClaimStreak" onclick="claimStreakBonus()" class="ml-2 bg-[#064e3b] hover:bg-[#043d2e] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition active:scale-95 shadow-sm">
+            Klaim
+          </button>
+        </div>
+      </section>
+      <!-- END: HeroBanner -->
+
+      <!-- BEGIN: MetricSummaryCards -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-5" data-purpose="metric-cards">
+        <!-- Card 1: Hidrasi Harian -->
+        <article class="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center justify-between">
+              <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                <svg class="w-4 h-4 fill-current" viewbox="0 0 24 24">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                </svg>
+              </div>
+              <span id="waterPercentBadge" class="text-[11px] font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">0% Tercapai</span>
+            </div>
+            <div class="mt-3 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Hidrasi Harian</span>
+                <div class="flex items-baseline gap-1 mt-0.5">
+                  <span id="waterCurrentL" class="text-2xl font-black text-slate-900">0.0</span>
+                  <span id="waterTargetL" class="text-xs font-bold text-slate-400">/ 2.0 L</span>
+                </div>
+                <span id="waterRemainingText" class="text-[11px] text-slate-400 font-medium">Kurang 2000 ml lagi</span>
+              </div>
+              <!-- Circular gauge indicator -->
+              <div id="waterGaugeCircle" class="relative w-12 h-12 rounded-full conic-water flex items-center justify-center shrink-0">
+                <div id="waterGaugePercent" class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-[10px] font-extrabold text-teal-700">
+                  0%
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Quick Add Water Buttons -->
+          <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+            <button onclick="quickAddWater(250)" class="bg-slate-100 hover:bg-teal-50 hover:text-teal-700 py-1.5 text-xs font-semibold text-slate-600 rounded-lg transition active:scale-95 text-center">
+              + 250ml
+            </button>
+            <button onclick="quickAddWater(500)" class="bg-slate-100 hover:bg-teal-50 hover:text-teal-700 py-1.5 text-xs font-semibold text-slate-600 rounded-lg transition active:scale-95 text-center">
+              + 500ml
+            </button>
+          </div>
+        </article>
+
+        <!-- Card 2: Kualitas Tidur -->
+        <article class="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center justify-between">
+              <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <svg class="w-4 h-4 fill-current" viewbox="0 0 24 24">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+              </div>
+              <span id="sleepQualityBadge" class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Sangat Baik</span>
+            </div>
+            <div class="mt-3">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kualitas Tidur Terakhir</span>
+              <div class="flex items-baseline gap-2 mt-0.5">
+                <span id="sleepDurationText" class="text-2xl font-black text-slate-900">7j 45m</span>
+                <span id="sleepEfficiencyText" class="text-xs font-bold text-teal-600">88% Efisiensi</span>
+              </div>
+              <span id="sleepScheduleText" class="text-[11px] text-slate-400 font-medium">23:10 - 06:55 • Istirahat Cukup</span>
+            </div>
+          </div>
+          <!-- Sleep breakdown horizontal bar -->
+          <div class="pt-2 border-t border-slate-100 space-y-1.5">
+            <div class="w-full h-2 rounded-full overflow-hidden flex bg-slate-100">
+              <div id="sleepBarDeep" class="bg-indigo-900 h-full w-[28%]" title="Deep Sleep"></div>
+              <div id="sleepBarREM" class="bg-teal-400 h-full w-[22%]" title="REM Sleep"></div>
+              <div id="sleepBarLight" class="bg-teal-200 h-full w-[50%]" title="Light Sleep"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-400 font-medium">
+              <span>Deep: ~2j</span>
+              <span>REM: ~1.5j</span>
+              <span>Light: ~4j</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 3: Aktivitas Fisik -->
+        <article class="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center justify-between">
+              <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <svg class="w-4 h-4 fill-current" viewbox="0 0 24 24">
+                  <path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"></path>
+                </svg>
+              </div>
+              <span id="activityPercentBadge" class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">68% Target</span>
+            </div>
+            <div class="mt-3">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Aktivitas Fisik Hari Ini</span>
+              <div class="flex items-baseline gap-1 mt-0.5">
+                <span id="activityMinutesVal" class="text-2xl font-black text-slate-900">45</span>
+                <span id="activityTargetVal" class="text-xs font-bold text-slate-400">/ 60 Menit</span>
+              </div>
+              <div class="flex items-center gap-2 text-[11px] text-slate-400 font-medium">
+                <span id="activityKcalText">🔥 ~340 kkal</span>
+                <span>•</span>
+                <span id="activityKmText">~3.8 km</span>
+              </div>
+            </div>
+          </div>
+          <!-- Steps Progress Bar -->
+          <div class="pt-2 border-t border-slate-100 space-y-1.5">
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+              <div id="activityProgressBar" class="bg-teal-600 h-full rounded-full transition-all duration-500" style="width: 68%;"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-400 font-medium">
+              <span id="activityRemainingText">15 menit tersisa</span>
+              <span class="text-slate-600 font-semibold" id="activityStatusText">Optimal sore ini</span>
+            </div>
+          </div>
+        </article>
+      </section>
+      <!-- END: MetricSummaryCards -->
+
+      <!-- BEGIN: MiddleTwoColumnLayout -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <!-- Column Left: Target & Rutinitas Hari Ini (8 Cols) -->
+        <div class="lg:col-span-8 space-y-5">
+          <section class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs" data-purpose="todays-habits">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-base font-bold text-slate-900">Target &amp; Rutinitas Hari Ini</h2>
+                  <span id="habitsCompletedBadge" class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.2 rounded-full">2 / 4 Selesai</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">Selesaikan seluruh rutinitas untuk menjaga rantai streak harian</p>
+              </div>
+              <button onclick="openAddTargetModal()" class="text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg flex items-center gap-1 transition">
+                <span class="text-sm leading-none">+</span> Tambah Target
+              </button>
+            </div>
+
+            <!-- List of Habits -->
+            <div id="habitsListContainer" class="space-y-2.5">
+              <!-- Dynamically rendered via JS -->
+              <div class="p-4 text-center text-xs text-slate-400">Memuat target aktif...</div>
+            </div>
+          </section>
+
+          <!-- BEGIN: WeeklyComplianceChart -->
+          <section class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs" data-purpose="weekly-trend">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-base font-bold text-slate-900">Tren Kepatuhan Mingguan</h2>
+                  <span id="chartAverageBadge" class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.2 rounded-full">Rata-rata 86%</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">Perbandingan rasio penyelesaian kebiasaan harian (Senin - Minggu)</p>
+              </div>
+              <!-- Legend -->
+              <div class="flex items-center gap-3 text-[11px] text-slate-500 font-medium self-end sm:self-auto">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-[#064e3b]"></span>
+                  <span>Kepatuhan (%)</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="w-3 h-0.5 border-t-2 border-dashed border-amber-500"></span>
+                  <span>Target 85%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bar Chart Canvas Simulation -->
+            <div class="relative pt-6 pb-2">
+              <!-- Target Line (85%) -->
+              <div class="absolute left-0 right-0 top-10 border-b border-dashed border-amber-500/70 z-0">
+                <span class="absolute right-0 -top-3 text-[9px] font-bold text-amber-600 bg-white pl-1">Target 85%</span>
+              </div>
+              <!-- Bars Container -->
+              <div id="weeklyBarsContainer" class="grid grid-cols-7 gap-2 md:gap-4 items-end h-40 pt-4 z-10 relative">
+                <!-- Dynamically rendered by JS -->
+              </div>
+            </div>
+
+            <!-- Footer Insight -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span id="chartInsightText" class="text-teal-700 font-medium flex items-center gap-1">
+                <svg class="w-3.5 h-3.5 text-teal-600" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                Konsistensi mingguan membantu ritme metabolisme tubuh tetap prima
+              </span>
+              <a onclick="openAnalyticsModal()" class="text-teal-800 font-bold hover:underline cursor-pointer" href="javascript:void(0)">Lihat Rincian Analitik</a>
+            </div>
+          </section>
+          <!-- END: WeeklyComplianceChart -->
+        </div>
+
+        <!-- Column Right: Quick Log & Recent Activity (4 Cols) -->
+        <div class="lg:col-span-4 space-y-5" id="quickLogSection">
+          <!-- Quick Log Card: Catat Cepat Cerdas -->
+          <section class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs" data-purpose="quick-log">
+            <div class="flex items-center justify-between mb-3.5">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <h2 class="text-sm font-bold text-slate-900">Catat Cepat Cerdas</h2>
+              </div>
+              <span class="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded">INSTAN</span>
+            </div>
+
+            <!-- Activity Tabs -->
+            <div class="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl mb-4 text-xs font-medium">
+              <button id="quickTabAir" onclick="switchQuickTab('air')" class="bg-white text-teal-900 font-bold py-1.5 rounded-lg shadow-2xs flex items-center justify-center gap-1">
+                <svg class="w-3 h-3 text-teal-600 fill-current" viewbox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+                Air
+              </button>
+              <button id="quickTabTidur" onclick="switchQuickTab('tidur')" class="text-slate-500 hover:text-slate-800 py-1.5 rounded-lg flex items-center justify-center gap-1 transition">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                Tidur
+              </button>
+              <button id="quickTabLatihan" onclick="switchQuickTab('latihan')" class="text-slate-500 hover:text-slate-800 py-1.5 rounded-lg flex items-center justify-center gap-1 transition">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                Latihan
+              </button>
+            </div>
+
+            <!-- Dynamic Form Container: AIR -->
+            <div id="quickFormAir" class="space-y-3">
+              <div class="space-y-2 mb-4">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-slate-500 font-medium">Takaran Sekali Minum:</span>
+                  <span id="selectedWaterAmountLabel" class="font-extrabold text-teal-800">250 ml</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                  <button type="button" onclick="selectWaterPreset(200)" id="btnPreset200" class="py-2 text-xs font-semibold rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-center">
+                    200 ml
+                  </button>
+                  <button type="button" onclick="selectWaterPreset(250)" id="btnPreset250" class="py-2 text-xs font-bold rounded-xl border border-teal-600 bg-teal-50 text-teal-800 text-center shadow-xs">
+                    250 ml
+                  </button>
+                  <button type="button" onclick="selectWaterPreset(500)" id="btnPreset500" class="py-2 text-xs font-semibold rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-center">
+                    500 ml
+                  </button>
+                </div>
+              </div>
+              <input type="text" id="quickWaterNotes" placeholder="Catatan tambahan (opsional)..." class="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:ring-1 focus:ring-teal-500 focus:border-teal-500 outline-none mb-3"/>
+            </div>
+
+            <!-- Dynamic Form Container: TIDUR -->
+            <div id="quickFormTidur" class="space-y-3 hidden">
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Mulai Tidur</label>
+                  <input type="time" id="quickSleepStart" value="23:00" class="w-full text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg focus:ring-1 focus:ring-teal-500 outline-none"/>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Waktu Bangun</label>
+                  <input type="time" id="quickSleepEnd" value="06:30" class="w-full text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg focus:ring-1 focus:ring-teal-500 outline-none"/>
+                </div>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Kualitas Tidur</label>
+                <div class="grid grid-cols-3 gap-1.5">
+                  <button type="button" onclick="selectSleepQuality('baik')" id="sqBaik" class="py-1 text-xs font-bold rounded-lg border border-teal-600 bg-teal-50 text-teal-800 text-center">Baik</button>
+                  <button type="button" onclick="selectSleepQuality('cukup')" id="sqCukup" class="py-1 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-center">Cukup</button>
+                  <button type="button" onclick="selectSleepQuality('buruk')" id="sqBuruk" class="py-1 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-center">Buruk</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dynamic Form Container: LATIHAN -->
+            <div id="quickFormLatihan" class="space-y-3 hidden">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Jenis Aktivitas</label>
+                <input type="text" id="quickActivityType" value="Jalan Kaki" placeholder="Contoh: Lari Pagi, Bersepeda, Senam" class="w-full text-xs px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-1 focus:ring-teal-500 outline-none"/>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Durasi (Menit)</label>
+                  <input type="number" id="quickActivityDuration" value="30" min="1" max="1440" class="w-full text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg focus:ring-1 focus:ring-teal-500 outline-none"/>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1">Intensitas</label>
+                  <select id="quickActivityIntensity" class="w-full text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg focus:ring-1 focus:ring-teal-500 outline-none">
+                    <option value="rendah">Rendah</option>
+                    <option value="sedang" selected>Sedang</option>
+                    <option value="tinggi">Tinggi</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Save Action Button -->
+            <button id="btnSubmitQuickLog" onclick="submitQuickLog()" class="w-full mt-4 bg-[#064e3b] hover:bg-[#043d2e] text-white py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition active:scale-98">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Simpan Instan</span>
+            </button>
+          </section>
+
+          <!-- Activity Logs: Aktivitas Terkini -->
+          <section class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs" data-purpose="recent-activities">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-sm font-bold text-slate-900">Aktivitas Terkini</h2>
+              <span class="text-[11px] font-semibold text-slate-400">Terbaru</span>
+            </div>
+
+            <!-- Log Items Container -->
+            <div id="recentActivityList" class="space-y-3.5">
+              <!-- Dynamically populated -->
+              <div class="text-center py-4 text-xs text-slate-400">Memuat riwayat aktivitas...</div>
+            </div>
+
+            <!-- View History Link -->
+            <div class="mt-4 pt-3 border-t border-slate-100 text-center">
+              <a onclick="openHistoryModal()" class="text-xs font-semibold text-slate-500 hover:text-teal-700 transition cursor-pointer" href="javascript:void(0)">
+                Lihat Semua Riwayat Lengkap &rarr;
+              </a>
+            </div>
+          </section>
+        </div>
+      </div>
+      <!-- END: MiddleTwoColumnLayout -->
+
+      <!-- Medical Disclaimer Footer (SRS/PRD NFR-22) -->
+      <footer class="pt-4 border-t border-slate-200 text-center text-[11px] text-slate-400">
+        <p class="max-w-2xl mx-auto">
+          ⚠️ <b>Peringatan Medis (NFR-22):</b> WellTrack adalah aplikasi pelacak kebiasaan hidup sehat pribadi dan bukan alat diagnosis medis. Aplikasi ini tidak menggantikan saran, diagnosis, atau perawatan medis dari tenaga kesehatan profesional.
+        </p>
+        <p class="mt-1 text-[10px] text-slate-400">
+          WellTrack Kelompok 10 &copy; 2026 &bull; FastAPI + PostgreSQL Neon
+        </p>
+      </footer>
+
+    </div>
+  </main>
+  <!-- END: MainContentArea -->
+
+</div>
+<!-- END: MainContainer -->
+
+<!-- ==========================================
+     MODALS SECTION
+     ========================================== -->
+
+<!-- 1. AUTH MODAL (LOGIN & REGISTER) -->
+<div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-slate-100 overflow-hidden relative">
+    <div class="h-2 bg-gradient-to-r from-emerald-500 to-teal-600"></div>
+    <div class="p-6">
+      <div class="text-center mb-5">
+        <div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center mx-auto mb-2 font-bold shadow-md shadow-teal-600/30">
+          W
+        </div>
+        <h3 class="text-xl font-bold text-slate-900" id="authModalTitle">Masuk ke WellTrack</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Pantau rutinitas dan kebiasaan hidup sehat Anda</p>
+      </div>
+
+      <!-- Tab Toggle -->
+      <div class="flex bg-slate-100 p-1 rounded-xl mb-4 text-xs font-semibold">
+        <button id="modalTabLogin" onclick="switchAuthModalTab('login')" class="flex-1 py-1.5 rounded-lg bg-white text-teal-800 shadow-xs transition">Masuk</button>
+        <button id="modalTabRegister" onclick="switchAuthModalTab('register')" class="flex-1 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">Daftar Baru</button>
+      </div>
+
+      <!-- Alert Box -->
+      <div id="authModalAlert" class="hidden mb-4 p-3 rounded-xl text-xs leading-snug"></div>
+
+      <!-- FORM LOGIN -->
+      <form id="formModalLogin" onsubmit="handleModalLogin(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1">Email</label>
+          <input type="email" id="modalLogEmail" required placeholder="nama@email.com" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-1 focus:ring-teal-500 outline-none"/>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1">Kata Sandi</label>
+          <input type="password" id="modalLogPassword" required placeholder="••••••••" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-1 focus:ring-teal-500 outline-none"/>
+        </div>
+        <button type="submit" id="btnModalSubmitLog" class="w-full py-2.5 bg-[#064e3b] hover:bg-[#043d2e] text-white font-semibold rounded-xl text-xs shadow-md transition">
+          Masuk ke Akun
+        </button>
+      </form>
+
+      <!-- FORM REGISTER -->
+      <form id="formModalRegister" onsubmit="handleModalRegister(event)" class="space-y-3 hidden">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1">Nama Lengkap</label>
+          <input type="text" id="modalRegName" required placeholder="Contoh: Alif Pratama" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-1 focus:ring-teal-500 outline-none"/>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1">Email</label>
+          <input type="email" id="modalRegEmail" required placeholder="nama@email.com" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-1 focus:ring-teal-500 outline-none"/>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1">Kata Sandi (Min. 8 Karakter)</label>
+          <input type="password" id="modalRegPassword" required minlength="8" placeholder="••••••••" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-1 focus:ring-teal-500 outline-none"/>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1">Konfirmasi Kata Sandi</label>
+          <input type="password" id="modalRegConfirm" required minlength="8" placeholder="••••••••" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-1 focus:ring-teal-500 outline-none"/>
+        </div>
+        <button type="submit" id="btnModalSubmitReg" class="w-full py-2.5 bg-[#064e3b] hover:bg-[#043d2e] text-white font-semibold rounded-xl text-xs shadow-md transition">
+          Daftar Sekarang
+        </button>
+      </form>
+
+      <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+        <span>Gunakan akun yang sama di Test Portal</span>
+        <a href="javascript:void(0)" onclick="goToTestAuth()" class="text-teal-700 font-semibold hover:underline">Buka Test Portal &rarr;</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. TAMBAH TARGET MODAL (FR-23 s/d FR-27) -->
+<div id="addTargetModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full border border-slate-100 overflow-hidden relative max-h-[90vh] flex flex-col">
+    <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <div class="flex items-center gap-2">
+        <span class="w-7 h-7 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-xs">+</span>
+        <h3 class="text-sm font-bold text-slate-900">Tambah Target Kesehatan</h3>
+      </div>
+      <button onclick="closeModal('addTargetModal')" class="text-slate-400 hover:text-slate-600 text-lg leading-none">&times;</button>
+    </div>
+    
+    <!-- Modal Tabs: Template Sistem vs Kustom Manual -->
+    <div class="px-5 pt-3">
+      <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+        <button id="targetTabTemplate" onclick="switchTargetTab('template')" class="flex-1 py-1.5 rounded-lg bg-white text-teal-800 shadow-xs">Template Sistem (Rekomendasi)</button>
+        <button id="targetTabManual" onclick="switchTargetTab('manual')" class="flex-1 py-1.5 rounded-lg text-slate-500 hover:text-slate-800">Target Kustom (Manual)</button>
+      </div>
+    </div>
+
+    <!-- Content Template -->
+    <div id="targetViewTemplate" class="p-5 overflow-y-auto space-y-3 flex-1">
+      <p class="text-xs text-slate-500">Pilih salah satu template rekomendasi tim medis WellTrack:</p>
+      <div id="templateListContainer" class="space-y-2">
+        <!-- Rendered by JS -->
+        <div class="text-center py-4 text-xs text-slate-400">Memuat template...</div>
+      </div>
+    </div>
+
+    <!-- Content Manual -->
+    <div id="targetViewManual" class="p-5 overflow-y-auto space-y-3 flex-1 hidden">
+      <form id="formManualTarget" onsubmit="handleCreateManualTarget(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Nama Target</label>
+          <input type="text" id="manTargetName" required placeholder="Contoh: Senam Pagi Rutin" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-1 focus:ring-teal-500 outline-none"/>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Kategori</label>
+            <select id="manTargetCategory" onchange="updateManualUnitOptions()" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-1 focus:ring-teal-500 outline-none">
+              <option value="aktivitas">Aktivitas</option>
+              <option value="air">Air</option>
+              <option value="tidur">Tidur</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Frekuensi</label>
+            <select id="manTargetFrequency" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-1 focus:ring-teal-500 outline-none">
+              <option value="harian">Harian</option>
+              <option value="mingguan">Mingguan</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Nilai Target</label>
+            <input type="number" id="manTargetValue" required min="1" step="any" placeholder="Contoh: 30" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-1 focus:ring-teal-500 outline-none"/>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Satuan</label>
+            <select id="manTargetUnit" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-1 focus:ring-teal-500 outline-none">
+              <option value="menit">menit</option>
+              <option value="jam">jam</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Durasi Target (Hari)</label>
+          <input type="number" id="manTargetDuration" value="30" min="1" max="365" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-1 focus:ring-teal-500 outline-none"/>
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-[#064e3b] hover:bg-[#043d2e] text-white font-semibold rounded-xl text-xs shadow-md transition">
+          Simpan Target Manual
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 3. RIWAYAT LENGKAP MODAL (FR-18, FR-19) -->
+<div id="historyModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-100 overflow-hidden relative max-h-[85vh] flex flex-col">
+    <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <div>
+        <h3 class="text-sm font-bold text-slate-900">Riwayat Catatan Kesehatan</h3>
+        <p class="text-[11px] text-slate-400">Seluruh catatan aktivitas fisik, konsumsi air, dan tidur Anda</p>
+      </div>
+      <button onclick="closeModal('historyModal')" class="text-slate-400 hover:text-slate-600 text-lg leading-none">&times;</button>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="px-5 py-3 border-b border-slate-100 flex gap-2 text-xs">
+      <button onclick="filterHistoryByType('')" id="hFilterAll" class="px-3 py-1 rounded-lg bg-teal-800 text-white font-semibold">Semua</button>
+      <button onclick="filterHistoryByType('air')" id="hFilterAir" class="px-3 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200">Air</button>
+      <button onclick="filterHistoryByType('aktivitas')" id="hFilterAktivitas" class="px-3 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200">Aktivitas</button>
+      <button onclick="filterHistoryByType('tidur')" id="hFilterTidur" class="px-3 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200">Tidur</button>
+    </div>
+
+    <!-- History List -->
+    <div id="fullHistoryContainer" class="p-5 overflow-y-auto space-y-2 flex-1">
+      <div class="text-center py-6 text-xs text-slate-400">Memuat riwayat...</div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. GAMIFICATION & BADGES MODAL (FR-33 s/d FR-38) -->
+<div id="gamificationModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full border border-slate-100 overflow-hidden relative max-h-[85vh] flex flex-col">
+    <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <div class="flex items-center gap-2">
+        <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-xs">🏆</span>
+        <h3 class="text-sm font-bold text-slate-900">Gamifikasi &amp; Pencapaian</h3>
+      </div>
+      <button onclick="closeModal('gamificationModal')" class="text-slate-400 hover:text-slate-600 text-lg leading-none">&times;</button>
+    </div>
+
+    <div class="p-5 overflow-y-auto space-y-4 flex-1">
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-3 gap-3 text-center">
+        <div class="bg-teal-50 border border-teal-100 p-3 rounded-xl">
+          <span class="text-[10px] uppercase font-bold text-teal-600">Total Poin</span>
+          <p id="gameModalPoints" class="text-xl font-black text-teal-900 mt-0.5">0</p>
+        </div>
+        <div class="bg-amber-50 border border-amber-100 p-3 rounded-xl">
+          <span class="text-[10px] uppercase font-bold text-amber-600">Streak Saat Ini</span>
+          <p id="gameModalStreak" class="text-xl font-black text-amber-900 mt-0.5">0 Hari</p>
+        </div>
+        <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-xl">
+          <span class="text-[10px] uppercase font-bold text-indigo-600">Rekor Terpanjang</span>
+          <p id="gameModalLongest" class="text-xl font-black text-indigo-900 mt-0.5">0 Hari</p>
+        </div>
+      </div>
+
+      <!-- Badges Section -->
+      <div>
+        <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2.5">Koleksi Lencana (Badges)</h4>
+        <div id="badgesGridContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          <!-- Rendered by JS -->
+          <div class="col-span-3 text-center py-4 text-xs text-slate-400">Memuat lencana...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. ANALYTICS & PROGRESS MODAL (FR-20 s/d FR-22) -->
+<div id="analyticsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-100 overflow-hidden relative max-h-[85vh] flex flex-col">
+    <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <div class="flex items-center gap-2">
+        <span class="w-7 h-7 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-xs">📈</span>
+        <h3 class="text-sm font-bold text-slate-900">Analitik &amp; Progres Kesehatan</h3>
+      </div>
+      <button onclick="closeModal('analyticsModal')" class="text-slate-400 hover:text-slate-600 text-lg leading-none">&times;</button>
+    </div>
+
+    <div class="p-5 overflow-y-auto space-y-4 flex-1">
+      <!-- Period Selector -->
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-semibold text-slate-600">Periode Waktu:</span>
+        <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+          <button onclick="loadChartModal('harian')" id="cPeriodHarian" class="px-3 py-1 rounded-lg text-slate-600">Harian (7 Hari)</button>
+          <button onclick="loadChartModal('mingguan')" id="cPeriodMingguan" class="px-3 py-1 rounded-lg bg-white text-teal-800 shadow-xs">Mingguan (8 Pekan)</button>
+          <button onclick="loadChartModal('bulanan')" id="cPeriodBulanan" class="px-3 py-1 rounded-lg text-slate-600">Bulanan (6 Bulan)</button>
+        </div>
+      </div>
+
+      <!-- Chart Display Container -->
+      <div id="analyticsChartContainer" class="bg-slate-50 border border-slate-200 rounded-xl p-4 min-h-[220px] flex flex-col justify-center">
+        <div class="text-center text-xs text-slate-400">Memuat data grafik...</div>
+      </div>
+
+      <div class="bg-teal-50 border border-teal-100 rounded-xl p-3 text-xs text-teal-800 flex items-start gap-2">
+        <span class="text-base leading-none">💡</span>
+        <p>Grafik dihitung otomatis dari data transaksi log aktivitas, air, dan tidur pada zona waktu lokal Anda (FR-20, FR-21).</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. SETTINGS & PROFILE MODAL (FR-04, FR-05) -->
+<div id="settingsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-slate-100 overflow-hidden relative max-h-[85vh] flex flex-col">
+    <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <h3 class="text-sm font-bold text-slate-900">Pengaturan Profil &amp; Akun</h3>
+      <button onclick="closeModal('settingsModal')" class="text-slate-400 hover:text-slate-600 text-lg leading-none">&times;</button>
+    </div>
+
+    <div class="p-5 overflow-y-auto space-y-4 flex-1 text-xs">
+      <!-- User Info Box -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+        <div class="flex justify-between">
+          <span class="text-slate-500">Nama Lengkap</span>
+          <span id="setProfName" class="font-bold text-slate-800">-</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Email</span>
+          <span id="setProfEmail" class="font-semibold text-slate-700">-</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">User ID</span>
+          <span id="setProfId" class="font-mono text-[10px] text-slate-400 break-all select-all">-</span>
+        </div>
+      </div>
+
+      <!-- Change Name Form -->
+      <form onsubmit="handleUpdateProfile(event)" class="space-y-2 border-t border-slate-100 pt-3">
+        <label class="block font-semibold text-slate-700">Ubah Nama Profil (FR-04)</label>
+        <div class="flex gap-2">
+          <input type="text" id="inputNewName" required placeholder="Nama baru..." class="flex-1 px-3 py-1.5 border border-slate-300 rounded-xl text-xs outline-none focus:ring-1 focus:ring-teal-500"/>
+          <button type="submit" class="bg-teal-700 hover:bg-teal-800 text-white px-3 py-1.5 rounded-xl font-semibold">Simpan</button>
+        </div>
+      </form>
+
+      <!-- Change Password Form (FR-05) -->
+      <form onsubmit="handleChangePassword(event)" class="space-y-2.5 border-t border-slate-100 pt-3">
+        <label class="block font-semibold text-slate-700">Ubah Kata Sandi (FR-05)</label>
+        <input type="password" id="inputOldPass" required placeholder="Kata sandi saat ini" class="w-full px-3 py-1.5 border border-slate-300 rounded-xl text-xs outline-none focus:ring-1 focus:ring-teal-500"/>
+        <input type="password" id="inputNewPass" required minlength="8" placeholder="Kata sandi baru (min 8 karakter)" class="w-full px-3 py-1.5 border border-slate-300 rounded-xl text-xs outline-none focus:ring-1 focus:ring-teal-500"/>
+        <input type="password" id="inputConfirmPass" required minlength="8" placeholder="Konfirmasi kata sandi baru" class="w-full px-3 py-1.5 border border-slate-300 rounded-xl text-xs outline-none focus:ring-1 focus:ring-teal-500"/>
+        <button type="submit" class="w-full py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-semibold mt-1">Ganti Kata Sandi</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- FLOATING TOAST NOTIFICATION -->
+<div id="toastNotification" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl text-xs max-w-sm">
+  <span id="toastIcon">✨</span>
+  <span id="toastMessage">Pesan notifikasi</span>
+</div>
+
+<!-- ==========================================
+     CORE JAVASCRIPT & BACKEND INTEGRATION
+     ========================================== -->
+<script>
+  // Dynamic API Base URL
+  const API_BASE = window.location.origin.includes(':8000') 
+    ? window.location.origin 
+    : 'http://127.0.0.1:8000';
+
+  function goToTestAuth() {
+    if (window.location.protocol === 'file:') {
+      window.location.href = 'test_auth.html';
+    } else {
+      window.location.href = '/auth';
+    }
+  }
+
+  // Global State
+  let currentUser = null;
+  let dashboardData = null;
+  let activeQuickTab = 'air';
+  let selectedWaterAmount = 250;
+  let selectedSleepQualityVal = 'baik';
+  let historyCache = [];
+
+  // Helper: Format Dates to Indonesian
+  function formatIndonesianDate(d) {
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const date = new Date(d);
+    return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+  }
+
+  // Toast Notification Trigger
+  function showToast(msg, type = 'success') {
+    const toast = document.getElementById('toastNotification');
+    const msgEl = document.getElementById('toastMessage');
+    const iconEl = document.getElementById('toastIcon');
+
+    if (type === 'success') {
+      iconEl.innerText = '✅';
+      toast.className = 'fixed bottom-5 right-5 z-50 transition-all duration-300 flex items-center gap-3 bg-emerald-900/95 text-emerald-100 border border-emerald-600 px-4 py-3 rounded-2xl shadow-2xl text-xs max-w-sm';
+    } else if (type === 'error') {
+      iconEl.innerText = '❌';
+      toast.className = 'fixed bottom-5 right-5 z-50 transition-all duration-300 flex items-center gap-3 bg-rose-900/95 text-rose-100 border border-rose-600 px-4 py-3 rounded-2xl shadow-2xl text-xs max-w-sm';
+    } else {
+      iconEl.innerText = 'ℹ️';
+      toast.className = 'fixed bottom-5 right-5 z-50 transition-all duration-300 flex items-center gap-3 bg-slate-900/95 text-slate-100 border border-slate-700 px-4 py-3 rounded-2xl shadow-2xl text-xs max-w-sm';
+    }
+
+    msgEl.innerHTML = msg;
+    toast.style.transform = 'translateY(0)';
+    toast.style.opacity = '1';
+
+    setTimeout(() => {
+      toast.style.transform = 'translateY(80px)';
+      toast.style.opacity = '0';
+    }, 3500);
+  }
+
+  // 1. CHECK DATABASE HEALTH
+  async function checkDbHealth() {
+    const dot = document.getElementById('dbDot');
+    const label = document.getElementById('dbStatusLabel');
+    try {
+      const res = await fetch(`${API_BASE}/health/db`);
+      const data = await res.json();
+      if (res.ok && data.database === 'ok') {
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+        label.innerText = 'Neon DB Online';
+      } else {
+        throw new Error();
+      }
+    } catch {
+      dot.className = 'w-2 h-2 rounded-full bg-rose-500';
+      label.innerText = 'Neon DB Offline';
+    }
+  }
+
+  // 2. CHECK AUTH TOKEN
+  function getToken() {
+    return localStorage.getItem('wt_token');
+  }
+
+  function checkAuthOrPrompt() {
+    const token = getToken();
+    if (!token) {
+      openAuthModal();
+      return false;
+    }
+    return true;
+  }
+
+  function openAuthModal() {
+    document.getElementById('authModal').classList.remove('hidden');
+  }
+
+  function closeAuthModal() {
+    document.getElementById('authModal').classList.add('hidden');
+  }
+
+  function switchAuthModalTab(tab) {
+    const logBtn = document.getElementById('modalTabLogin');
+    const regBtn = document.getElementById('modalTabRegister');
+    const logForm = document.getElementById('formModalLogin');
+    const regForm = document.getElementById('formModalRegister');
+    const title = document.getElementById('authModalTitle');
+
+    if (tab === 'login') {
+      logBtn.className = 'flex-1 py-1.5 rounded-lg bg-white text-teal-800 shadow-xs transition';
+      regBtn.className = 'flex-1 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition';
+      logForm.classList.remove('hidden');
+      regForm.classList.add('hidden');
+      title.innerText = 'Masuk ke WellTrack';
+    } else {
+      regBtn.className = 'flex-1 py-1.5 rounded-lg bg-white text-teal-800 shadow-xs transition';
+      logBtn.className = 'flex-1 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition';
+      regForm.classList.remove('hidden');
+      logForm.classList.add('hidden');
+      title.innerText = 'Daftar Akun Baru';
+    }
+  }
+
+  async function handleModalLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('modalLogEmail').value.trim();
+    const password = document.getElementById('modalLogPassword').value;
+    const btn = document.getElementById('btnModalSubmitLog');
+
+    btn.disabled = true;
+    btn.innerText = 'Memverifikasi...';
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.access_token) {
+        localStorage.setItem('wt_token', data.access_token);
+        closeAuthModal();
+        showToast('Berhasil masuk! Selamat datang kembali.', 'success');
+        await loadDashboardData();
+      } else {
+        showAuthAlert(data.detail || 'Email atau kata sandi tidak valid.');
+      }
+    } catch {
+      showAuthAlert('Gagal terhubung ke backend.');
+    } finally {
+      btn.disabled = false;
+      btn.innerText = 'Masuk ke Akun';
+    }
+  }
+
+  async function handleModalRegister(e) {
+    e.preventDefault();
+    const name = document.getElementById('modalRegName').value.trim();
+    const email = document.getElementById('modalRegEmail').value.trim();
+    const password = document.getElementById('modalRegPassword').value;
+    const confirm_password = document.getElementById('modalRegConfirm').value;
+
+    if (password !== confirm_password) {
+      showAuthAlert('Konfirmasi kata sandi tidak sama.');
+      return;
+    }
+
+    const btn = document.getElementById('btnModalSubmitReg');
+    btn.disabled = true;
+    btn.innerText = 'Mendaftar...';
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, confirm_password })
+      });
+      const data = await res.json();
+      if (res.status === 201) {
+        showToast(`Akun ${data.name} berhasil dibuat! Otomatis masuk...`, 'success');
+        // Auto login
+        const loginRes = await fetch(`${API_BASE}/api/v1/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const loginData = await loginRes.json();
+        if (loginData.access_token) {
+          localStorage.setItem('wt_token', loginData.access_token);
+          closeAuthModal();
+          await loadDashboardData();
+        }
+      } else {
+        const msg = data.detail || (data.errors ? data.errors.map(err => err.message).join('<br>') : 'Registrasi gagal.');
+        showAuthAlert(msg);
+      }
+    } catch {
+      showAuthAlert('Gagal terhubung ke backend.');
+    } finally {
+      btn.disabled = false;
+      btn.innerText = 'Daftar Sekarang';
+    }
+  }
+
+  function showAuthAlert(msg) {
+    const alert = document.getElementById('authModalAlert');
+    alert.innerHTML = msg;
+    alert.className = 'mb-4 p-3 rounded-xl text-xs leading-snug bg-rose-50 text-rose-700 border border-rose-200';
+    alert.classList.remove('hidden');
+  }
+
+  function handleLogout() {
+    if (confirm('Apakah Anda yakin ingin keluar dari WellTrack?')) {
+      localStorage.removeItem('wt_token');
+      currentUser = null;
+      dashboardData = null;
+      showToast('Anda telah keluar dari sesi.', 'info');
+      openAuthModal();
+    }
+  }
+
+  // 3. LOAD DASHBOARD DATA FROM BACKEND
+  async function loadDashboardData() {
+    const token = getToken();
+    if (!token) {
+      openAuthModal();
+      return;
+    }
+
+    try {
+      // 1. Fetch user me
+      const meRes = await fetch(`${API_BASE}/api/v1/users/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (meRes.status === 401) {
+        localStorage.removeItem('wt_token');
+        openAuthModal();
+        return;
+      }
+      currentUser = await meRes.json();
+      updateUserHeaderUI();
+
+      // 2. Fetch Dashboard Summary
+      const dashRes = await fetch(`${API_BASE}/api/v1/dashboard`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (dashRes.ok) {
+        dashboardData = await dashRes.json();
+        renderDashboardUI();
+      }
+
+      // 3. Fetch Recent History
+      await loadRecentHistory();
+
+      // 4. Fetch Weekly Chart
+      await loadWeeklyChartData();
+
+    } catch (err) {
+      console.error('Error loading dashboard:', err);
+      showToast('Gagal memuat data dari server.', 'error');
+    }
+  }
+
+  // UPDATE USER PROFILE IN HEADER & HERO
+  function updateUserHeaderUI() {
+    if (!currentUser) return;
+    document.getElementById('headerUserName').innerText = currentUser.name;
+    document.getElementById('headerUserPoints').innerText = `${currentUser.total_points} Poin`;
+    document.getElementById('userAvatar').innerText = currentUser.name.charAt(0).toUpperCase();
+
+    // Settings modal profile fields
+    document.getElementById('setProfName').innerText = currentUser.name;
+    document.getElementById('setProfEmail').innerText = currentUser.email;
+    document.getElementById('setProfId').innerText = currentUser.id;
+    document.getElementById('inputNewName').value = currentUser.name;
+  }
+
+  // RENDER COMPLETE DASHBOARD FROM DASHBOARD DATA
+  function renderDashboardUI() {
+    if (!dashboardData) return;
+
+    // A. Hero Banner
+    const todayDate = dashboardData.today || new Date();
+    document.getElementById('currentDateString').innerHTML = `
+      <svg class="w-3.5 h-3.5 text-teal-700" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="18" rx="2" ry="2" width="18" x="3" y="4"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg>
+      ${formatIndonesianDate(todayDate)}
+    `;
+    const firstName = currentUser?.name ? currentUser.name.split(' ')[0] : 'Sobat';
+    document.getElementById('heroGreeting').innerText = `Selamat datang kembali, ${firstName} !`;
+    
+    // Streak Pill & Weekly Claim Card
+    const streak = dashboardData.current_streak || 0;
+    document.getElementById('topStreakText').innerText = `${streak} Hari Streak`;
+    document.getElementById('heroStreakTitle').innerText = `${streak} Hari Beruntun!`;
+    document.getElementById('heroStreakSubtitle').innerText = streak > 0 
+      ? 'Konsistensi aktif! Klaim reward mingguan' 
+      : 'Catat kebiasaan hari ini untuk memulai streak!';
+
+    // B. Card 1: Hidrasi Harian
+    const totalMl = Number(dashboardData.water_today?.total_ml || 0);
+    // Find active water target or default to 2000 ml
+    const waterTargetObj = dashboardData.active_targets.find(t => t.category === 'air');
+    const targetMl = waterTargetObj ? Number(waterTargetObj.target_value) : 2000;
+    const waterPct = Math.min(100, Math.round((totalMl / targetMl) * 100));
+
+    document.getElementById('waterCurrentL').innerText = (totalMl / 1000).toFixed(1);
+    document.getElementById('waterTargetL').innerText = `/ ${(targetMl / 1000).toFixed(1)} L`;
+    document.getElementById('waterPercentBadge').innerText = `${waterPct}% Tercapai`;
+    document.getElementById('waterGaugePercent').innerText = `${waterPct}%`;
+
+    const remainingMl = Math.max(0, targetMl - totalMl);
+    document.getElementById('waterRemainingText').innerText = remainingMl === 0 
+      ? 'Target harian terpenuhi! 🎉' 
+      : `Kurang ${remainingMl} ml lagi`;
+
+    // Conic gradient update
+    const gauge = document.getElementById('waterGaugeCircle');
+    gauge.style.background = `conic-gradient(#0d9488 0% ${waterPct}%, #e2e8f0 ${waterPct}% 100%)`;
+
+    // C. Card 2: Kualitas Tidur
+    const lastSleep = dashboardData.last_sleep;
+    if (lastSleep) {
+      const mins = lastSleep.duration_minutes || 0;
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      document.getElementById('sleepDurationText').innerText = `${h}j ${m}m`;
+      const q = (lastSleep.quality || 'baik').toLowerCase();
+      const qLabel = q === 'baik' ? 'Sangat Baik' : (q === 'cukup' ? 'Cukup' : 'Kurang');
+      document.getElementById('sleepQualityBadge').innerText = qLabel;
+      document.getElementById('sleepEfficiencyText').innerText = q === 'baik' ? '90% Efisiensi' : (q === 'cukup' ? '75% Efisiensi' : '55% Efisiensi');
+
+      const sTime = new Date(lastSleep.sleep_start).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      const eTime = new Date(lastSleep.sleep_end).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('sleepScheduleText').innerText = `${sTime} - ${eTime} • ${lastSleep.notes || 'Istirahat Cukup'}`;
+    } else {
+      document.getElementById('sleepDurationText').innerText = '0j 0m';
+      document.getElementById('sleepQualityBadge').innerText = 'Belum Ada';
+      document.getElementById('sleepEfficiencyText').innerText = '-';
+      document.getElementById('sleepScheduleText').innerText = 'Belum mencatat tidur hari ini';
+    }
+
+    // D. Card 3: Aktivitas Fisik
+    const actMins = Number(dashboardData.activity_today?.total_minutes || 0);
+    const actTargetObj = dashboardData.active_targets.find(t => t.category === 'aktivitas');
+    const actTargetMins = actTargetObj ? Number(actTargetObj.target_value) : 60;
+    const actPct = Math.min(100, Math.round((actMins / actTargetMins) * 100));
+
+    document.getElementById('activityMinutesVal').innerText = actMins;
+    document.getElementById('activityTargetVal').innerText = `/ ${actTargetMins} Menit`;
+    document.getElementById('activityPercentBadge').innerText = `${actPct}% Target`;
+    document.getElementById('activityProgressBar').style.width = `${actPct}%`;
+
+    const estKcal = Math.round(actMins * 7.5);
+    const estKm = (actMins * 0.08).toFixed(1);
+    document.getElementById('activityKcalText').innerText = `🔥 ~${estKcal} kkal`;
+    document.getElementById('activityKmText').innerText = `~${estKm} km`;
+    
+    const remainingAct = Math.max(0, actTargetMins - actMins);
+    document.getElementById('activityRemainingText').innerText = remainingAct === 0 
+      ? 'Target tercapai! 🌟' 
+      : `${remainingAct} menit tersisa`;
+
+    // E. Target & Rutinitas Hari Ini
+    renderHabitsList(dashboardData.active_targets);
+  }
+
+  // RENDER HABITS / TARGETS LIST
+  function renderHabitsList(targets) {
+    const container = document.getElementById('habitsListContainer');
+    const badge = document.getElementById('habitsCompletedBadge');
+
+    if (!targets || targets.length === 0) {
+      badge.innerText = '0 Target';
+      container.innerHTML = `
+        <div class="p-6 text-center rounded-xl bg-slate-50 border border-dashed border-slate-200">
+          <p class="text-xs text-slate-500 font-medium">Belum ada target aktif untuk hari ini.</p>
+          <button onclick="openAddTargetModal()" class="mt-2 text-xs font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-lg transition">
+            + Pilih dari Template Target
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    let completedCount = 0;
+    let html = '';
+
+    targets.forEach(t => {
+      const isCompleted = t.progress?.completed || false;
+      if (isCompleted) completedCount++;
+
+      const pct = t.progress?.percentage || 0;
+      const realized = t.progress?.realized || 0;
+
+      let tagColor = 'bg-teal-100/60 text-teal-700';
+      let tagText = `Berjalan ${pct}%`;
+      if (isCompleted) {
+        tagColor = 'bg-emerald-100 text-emerald-800';
+        tagText = 'Selesai';
+      }
+
+      html += `
+        <div class="habit-item flex items-center justify-between p-3 rounded-xl bg-slate-50/70 border border-slate-100 hover:border-slate-200 transition">
+          <div class="flex items-center gap-3">
+            <div onclick="toggleHabitAction('${t.category}')" class="w-5 h-5 rounded-md ${isCompleted ? 'bg-teal-700 text-white flex items-center justify-center shadow-xs' : 'border-2 border-slate-300 bg-white'} cursor-pointer transition">
+              ${isCompleted ? '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold ${isCompleted ? 'text-slate-600 line-through' : 'text-slate-800'} habit-title">${t.name}</span>
+                <span class="text-[10px] font-semibold ${tagColor} px-1.5 py-0.2 rounded">${tagText}</span>
+              </div>
+              <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+                <span class="flex items-center gap-1">
+                  <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  ${t.frequency === 'harian' ? 'Harian' : 'Mingguan'}
+                </span>
+                <span>•</span>
+                <span class="text-amber-600 font-semibold flex items-center gap-0.5">🔥 ${dashboardData.current_streak} hari</span>
+              </div>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-bold ${isCompleted ? 'text-emerald-700' : 'text-slate-800'}">${realized} / ${t.target_value} ${t.unit}</span>
+            <p class="text-[10px] ${isCompleted ? 'text-emerald-600 font-semibold' : 'text-slate-400'}">${isCompleted ? '+Bonus Poin' : 'Target ' + t.frequency}</p>
+          </div>
+        </div>
+      `;
+    });
+
+    badge.innerText = `${completedCount} / ${targets.length} Selesai`;
+    container.innerHTML = html;
+  }
+
+  function filterHabits(keyword) {
+    const q = keyword.toLowerCase().trim();
+    const items = document.querySelectorAll('.habit-item');
+    items.forEach(el => {
+      const title = el.querySelector('.habit-title')?.innerText.toLowerCase() || '';
+      el.style.display = title.includes(q) ? 'flex' : 'none';
+    });
+  }
+
+  function toggleHabitAction(category) {
+    switchQuickTab(category === 'aktivitas' ? 'latihan' : category);
+    scrollToQuickLog();
+    showToast(`Silakan catat progress ${category} via panel Catat Cepat Cerdas.`, 'info');
+  }
+
+  // 4. LOAD RECENT HISTORY LOGS
+  async function loadRecentHistory() {
+    const token = getToken();
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/history?limit=4`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        historyCache = data.items || [];
+        renderRecentActivityList(historyCache);
+      }
+    } catch (err) {
+      console.error('History load error:', err);
+    }
+  }
+
+  function renderRecentActivityList(items) {
+    const container = document.getElementById('recentActivityList');
+    if (!items || items.length === 0) {
+      container.innerHTML = '<div class="text-center py-4 text-xs text-slate-400">Belum ada aktivitas tercatat hari ini.</div>';
+      return;
+    }
+
+    let html = '';
+    items.forEach(item => {
+      let iconBg = 'bg-teal-50 text-teal-600';
+      let iconSvg = '<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>';
+
+      if (item.type === 'aktivitas') {
+        iconBg = 'bg-emerald-50 text-emerald-600';
+        iconSvg = '<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"></path></svg>';
+      } else if (item.type === 'tidur') {
+        iconBg = 'bg-indigo-50 text-indigo-600';
+        iconSvg = '<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+      }
+
+      html += `
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full ${iconBg} flex items-center justify-center shrink-0 mt-0.5">
+            ${iconSvg}
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-800">${item.title}</span>
+              <span class="text-[10px] text-slate-400 font-medium">${item.value} ${item.unit}</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Tanggal: ${item.log_date}</p>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  // 5. LOAD WEEKLY CHART DATA
+  async function loadWeeklyChartData() {
+    const token = getToken();
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/charts?period=mingguan`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        renderWeeklyChartBars(data);
+      }
+    } catch (e) {
+      console.error('Error loading chart:', e);
+    }
+  }
+
+  function renderWeeklyChartBars(chartData) {
+    const container = document.getElementById('weeklyBarsContainer');
+    const dayNames = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+    const todayDayIdx = (new Date().getDay() + 6) % 7; // Monday = 0, Sunday = 6
+
+    // Preset base percentages or computed from series
+    const basePcts = [85, 92, 88, 78, 25, 25, 25];
+
+    let html = '';
+    dayNames.forEach((dName, idx) => {
+      const isToday = idx === todayDayIdx;
+      const height = basePcts[idx] || 30;
+      const barColor = isToday 
+        ? 'bg-[#0d9488] ring-2 ring-teal-500/30 hover:bg-teal-600' 
+        : (idx < todayDayIdx ? 'bg-[#064e3b] hover:bg-teal-700' : 'bg-slate-100');
+      const labelColor = isToday ? 'font-bold text-teal-800' : 'font-medium text-slate-500';
+
+      html += `
+        <div class="flex flex-col items-center gap-2 h-full justify-end">
+          <div title="${dName}: ${height}% Kepatuhan" class="w-full max-w-[32px] ${barColor} rounded-t-md transition-all duration-300 cursor-pointer" style="height: ${height}%;"></div>
+          <span class="text-[11px] ${labelColor}">${dName}${isToday ? '*' : ''}</span>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  // 6. QUICK LOG INTERACTION (AIR, TIDUR, LATIHAN)
+  function switchQuickTab(tab) {
+    activeQuickTab = tab;
+    const tabAir = document.getElementById('quickTabAir');
+    const tabTidur = document.getElementById('quickTabTidur');
+    const tabLatihan = document.getElementById('quickTabLatihan');
+
+    const formAir = document.getElementById('quickFormAir');
+    const formTidur = document.getElementById('quickFormTidur');
+    const formLatihan = document.getElementById('quickFormLatihan');
+
+    [tabAir, tabTidur, tabLatihan].forEach(btn => {
+      btn.className = 'text-slate-500 hover:text-slate-800 py-1.5 rounded-lg flex items-center justify-center gap-1 transition';
+    });
+    [formAir, formTidur, formLatihan].forEach(f => f.classList.add('hidden'));
+
+    if (tab === 'air') {
+      tabAir.className = 'bg-white text-teal-900 font-bold py-1.5 rounded-lg shadow-2xs flex items-center justify-center gap-1';
+      formAir.classList.remove('hidden');
+    } else if (tab === 'tidur') {
+      tabTidur.className = 'bg-white text-teal-900 font-bold py-1.5 rounded-lg shadow-2xs flex items-center justify-center gap-1';
+      formTidur.classList.remove('hidden');
+    } else {
+      tabLatihan.className = 'bg-white text-teal-900 font-bold py-1.5 rounded-lg shadow-2xs flex items-center justify-center gap-1';
+      formLatihan.classList.remove('hidden');
+    }
+  }
+
+  function selectWaterPreset(ml) {
+    selectedWaterAmount = ml;
+    document.getElementById('selectedWaterAmountLabel').innerText = `${ml} ml`;
+
+    [200, 250, 500].forEach(val => {
+      const btn = document.getElementById(`btnPreset${val}`);
+      if (val === ml) {
+        btn.className = 'py-2 text-xs font-bold rounded-xl border border-teal-600 bg-teal-50 text-teal-800 text-center shadow-xs';
+      } else {
+        btn.className = 'py-2 text-xs font-semibold rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-center';
+      }
+    });
+  }
+
+  function selectSleepQuality(q) {
+    selectedSleepQualityVal = q;
+    ['baik', 'cukup', 'buruk'].forEach(val => {
+      const cap = val.charAt(0).toUpperCase() + val.slice(1);
+      const btn = document.getElementById(`sq${cap}`);
+      if (val === q) {
+        btn.className = 'py-1 text-xs font-bold rounded-lg border border-teal-600 bg-teal-50 text-teal-800 text-center';
+      } else {
+        btn.className = 'py-1 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-center';
+      }
+    });
+  }
+
+  // Quick Add Water (+250ml / +500ml) from Card
+  async function quickAddWater(ml) {
+    if (!checkAuthOrPrompt()) return;
+    const token = getToken();
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+    const timeStr = now.toTimeString().split(' ')[0];
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/water-logs`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          log_date: todayStr,
+          log_time: timeStr,
+          amount: ml,
+          unit: 'ml',
+          notes: 'Dicatat via Tombol Cepat Dashboard'
+        })
+      });
+
+      const data = await res.json();
+      if (res.status === 201) {
+        showToast(`💧 Berhasil mencatat +${ml}ml air! (+${data.gamification?.points_earned || 5} Poin)`, 'success');
+        await loadDashboardData();
+      } else {
+        showToast(data.detail || 'Gagal menyimpan catatan air.', 'error');
+      }
+    } catch {
+      showToast('Gagal terhubung ke server.', 'error');
+    }
+  }
+
+  // Submit Quick Log Handler
+  async function submitQuickLog() {
+    if (!checkAuthOrPrompt()) return;
+    const token = getToken();
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+    const timeStr = now.toTimeString().split(' ')[0];
+    const btn = document.getElementById('btnSubmitQuickLog');
+
+    btn.disabled = true;
+    btn.innerText = 'Menyimpan...';
+
+    try {
+      if (activeQuickTab === 'air') {
+        const notes = document.getElementById('quickWaterNotes').value.trim() || 'Dicatat via Catat Cepat Cerdas';
+        const res = await fetch(`${API_BASE}/api/v1/water-logs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({
+            log_date: todayStr,
+            log_time: timeStr,
+            amount: selectedWaterAmount,
+            unit: 'ml',
+            notes: notes
+          })
+        });
+        const data = await res.json();
+        if (res.status === 201) {
+          showToast(`💧 +${selectedWaterAmount}ml air berhasil dicatat! (+${data.gamification?.points_earned || 5} Poin)`, 'success');
+          document.getElementById('quickWaterNotes').value = '';
+          await loadDashboardData();
+        } else {
+          showToast(data.detail || 'Gagal menyimpan catatan air.', 'error');
+        }
+      } else if (activeQuickTab === 'tidur') {
+        const sTime = document.getElementById('quickSleepStart').value;
+        const eTime = document.getElementById('quickSleepEnd').value;
+        const res = await fetch(`${API_BASE}/api/v1/sleep-logs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({
+            sleep_date: todayStr,
+            sleep_start_time: sTime + ':00',
+            sleep_end_time: eTime + ':00',
+            quality: selectedSleepQualityVal,
+            notes: 'Dicatat via Catat Cepat Cerdas'
+          })
+        });
+        const data = await res.json();
+        if (res.status === 201) {
+          showToast(`🌙 Catatan tidur berhasil disimpan! (+${data.gamification?.points_earned || 10} Poin)`, 'success');
+          await loadDashboardData();
+        } else {
+          showToast(data.detail || 'Gagal menyimpan catatan tidur.', 'error');
+        }
+      } else if (activeQuickTab === 'latihan') {
+        const actType = document.getElementById('quickActivityType').value.trim() || 'Aktivitas Fisik';
+        const duration = parseInt(document.getElementById('quickActivityDuration').value) || 30;
+        const intensity = document.getElementById('quickActivityIntensity').value;
+
+        const res = await fetch(`${API_BASE}/api/v1/activity-logs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({
+            activity_type: actType,
+            activity_date: todayStr,
+            duration_minutes: duration,
+            intensity: intensity,
+            notes: 'Dicatat via Catat Cepat Cerdas'
+          })
+        });
+        const data = await res.json();
+        if (res.status === 201) {
+          showToast(`🏃 ${actType} (${duration} mnt) berhasil dicatat! (+${data.gamification?.points_earned || 10} Poin)`, 'success');
+          await loadDashboardData();
+        } else {
+          showToast(data.detail || 'Gagal menyimpan catatan aktivitas.', 'error');
+        }
+      }
+    } catch {
+      showToast('Gagal terhubung ke backend server.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span>Simpan Instan</span>
+      `;
+    }
+  }
+
+  // 7. CLAIM STREAK BONUS
+  function claimStreakBonus() {
+    const btn = document.getElementById('btnClaimStreak');
+    btn.disabled = true;
+    btn.innerText = 'Diklaim';
+    btn.className = 'ml-2 bg-slate-200 text-slate-500 text-xs font-semibold px-3 py-1.5 rounded-lg cursor-not-allowed';
+    showToast('🎉 Selamat! Bonus konsistensi mingguan +150 XP berhasil ditambahkan ke akun Anda.', 'success');
+  }
+
+  // 8. SCROLL & VIEW HELPERS
+  function scrollToQuickLog() {
+    document.getElementById('quickLogSection').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+  }
+
+  function switchNavView(view) {
+    if (view === 'dashboard') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  // 9. MODALS DATA FETCHERS:
+  // A. Tambah Target Modal
+  async function openAddTargetModal() {
+    if (!checkAuthOrPrompt()) return;
+    document.getElementById('addTargetModal').classList.remove('hidden');
+    await loadTargetTemplates();
+  }
+
+  function switchTargetTab(tab) {
+    const btnT = document.getElementById('targetTabTemplate');
+    const btnM = document.getElementById('targetTabManual');
+    const viewT = document.getElementById('targetViewTemplate');
+    const viewM = document.getElementById('targetViewManual');
+
+    if (tab === 'template') {
+      btnT.className = 'flex-1 py-1.5 rounded-lg bg-white text-teal-800 shadow-xs';
+      btnM.className = 'flex-1 py-1.5 rounded-lg text-slate-500 hover:text-slate-800';
+      viewT.classList.remove('hidden');
+      viewM.classList.add('hidden');
+    } else {
+      btnM.className = 'flex-1 py-1.5 rounded-lg bg-white text-teal-800 shadow-xs';
+      btnT.className = 'flex-1 py-1.5 rounded-lg text-slate-500 hover:text-slate-800';
+      viewM.classList.remove('hidden');
+      viewT.classList.add('hidden');
+    }
+  }
+
+  async function loadTargetTemplates() {
+    const token = getToken();
+    const container = document.getElementById('templateListContainer');
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/targets/templates`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const templates = await res.json();
+        if (templates.length === 0) {
+          container.innerHTML = '<div class="text-center py-4 text-xs text-slate-400">Belum ada template terpasang di database.</div>';
+          return;
+        }
+
+        let html = '';
+        templates.forEach(t => {
+          html += `
+            <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-white hover:border-teal-500 transition flex items-center justify-between">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-slate-800">${t.name}</span>
+                  <span class="text-[9px] uppercase font-bold px-1.5 py-0.2 rounded bg-teal-100 text-teal-800">${t.difficulty}</span>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-0.5">${t.description || ''}</p>
+                <span class="text-[10px] text-teal-700 font-semibold">${t.target_value} ${t.unit} • ${t.frequency}</span>
+              </div>
+              <button onclick="createTargetFromTemplate('${t.id}')" class="bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shrink-0 transition">
+                Mulai Target
+              </button>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      }
+    } catch {
+      container.innerHTML = '<div class="text-center py-4 text-xs text-rose-500">Gagal memuat template dari database.</div>';
+    }
+  }
+
+  async function createTargetFromTemplate(templateId) {
+    const token = getToken();
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/targets/from-template`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          template_id: templateId,
+          duration_days: 30
+        })
+      });
+      const data = await res.json();
+      if (res.status === 201) {
+        showToast(`Target "${data.name}" berhasil diaktifkan!`, 'success');
+        closeModal('addTargetModal');
+        await loadDashboardData();
+      } else {
+        showToast(data.detail || 'Target gagal diaktifkan.', 'error');
+      }
+    } catch {
+      showToast('Gagal membuat target dari template.', 'error');
+    }
+  }
+
+  function updateManualUnitOptions() {
+    const cat = document.getElementById('manTargetCategory').value;
+    const unitSelect = document.getElementById('manTargetUnit');
+    if (cat === 'air') {
+      unitSelect.innerHTML = '<option value="ml">ml</option><option value="l">l</option><option value="gelas">gelas</option>';
+    } else {
+      unitSelect.innerHTML = '<option value="menit">menit</option><option value="jam">jam</option>';
+    }
+  }
+
+  async function handleCreateManualTarget(e) {
+    e.preventDefault();
+    const token = getToken();
+    const name = document.getElementById('manTargetName').value.trim();
+    const category = document.getElementById('manTargetCategory').value;
+    const frequency = document.getElementById('manTargetFrequency').value;
+    const target_value = parseFloat(document.getElementById('manTargetValue').value);
+    const unit = document.getElementById('manTargetUnit').value;
+    const duration_days = parseInt(document.getElementById('manTargetDuration').value) || 30;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/targets`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ name, category, frequency, target_value, unit, duration_days })
+      });
+      const data = await res.json();
+      if (res.status === 201) {
+        showToast(`Target manual "${data.name}" berhasil dibuat!`, 'success');
+        closeModal('addTargetModal');
+        await loadDashboardData();
+      } else {
+        showToast(data.detail || 'Gagal membuat target manual.', 'error');
+      }
+    } catch {
+      showToast('Gagal menghubungi backend.', 'error');
+    }
+  }
+
+  // B. Full History Modal
+  async function openHistoryModal() {
+    if (!checkAuthOrPrompt()) return;
+    document.getElementById('historyModal').classList.remove('hidden');
+    await fetchFullHistory('');
+  }
+
+  async function fetchFullHistory(filterType) {
+    const token = getToken();
+    const container = document.getElementById('fullHistoryContainer');
+    container.innerHTML = '<div class="text-center py-6 text-xs text-slate-400">Memuat riwayat...</div>';
+
+    let url = `${API_BASE}/api/v1/history?limit=30`;
+    if (filterType) url += `&type=${filterType}`;
+
+    try {
+      const res = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const items = data.items || [];
+        if (items.length === 0) {
+          container.innerHTML = '<div class="text-center py-6 text-xs text-slate-400">Belum ada data untuk kategori ini.</div>';
+          return;
+        }
+
+        let html = '';
+        items.forEach(it => {
+          html += `
+            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+              <div>
+                <span class="font-bold text-slate-800">${it.title}</span>
+                <p class="text-[11px] text-slate-400">${it.log_date} &bull; Tipe: <span class="capitalize font-semibold text-slate-600">${it.type}</span></p>
+              </div>
+              <div class="text-right">
+                <span class="font-bold text-teal-800">${it.value} ${it.unit}</span>
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      }
+    } catch {
+      container.innerHTML = '<div class="text-center py-6 text-xs text-rose-500">Gagal mengambil riwayat.</div>';
+    }
+  }
+
+  function filterHistoryByType(t) {
+    ['All', 'Air', 'Aktivitas', 'Tidur'].forEach(k => {
+      const btn = document.getElementById(`hFilter${k}`);
+      if ((t === '' && k === 'All') || (t === k.toLowerCase())) {
+        btn.className = 'px-3 py-1 rounded-lg bg-teal-800 text-white font-semibold';
+      } else {
+        btn.className = 'px-3 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200';
+      }
+    });
+    fetchFullHistory(t);
+  }
+
+  // C. Gamification Modal
+  async function openGamificationModal() {
+    if (!checkAuthOrPrompt()) return;
+    document.getElementById('gamificationModal').classList.remove('hidden');
+
+    const token = getToken();
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/gamification/summary`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        document.getElementById('gameModalPoints').innerText = `${data.total_points} Poin`;
+        document.getElementById('gameModalStreak').innerText = `${data.current_streak} Hari`;
+        document.getElementById('gameModalLongest').innerText = `${data.longest_streak} Hari`;
+
+        const bGrid = document.getElementById('badgesGridContainer');
+        if (data.badges && data.badges.length > 0) {
+          let bHtml = '';
+          data.badges.forEach(b => {
+            const isEarned = b.earned;
+            bHtml += `
+              <div class="p-3 rounded-xl border ${isEarned ? 'border-amber-200 bg-amber-50/50' : 'border-slate-200 bg-slate-50 opacity-60'} text-center flex flex-col items-center">
+                <span class="text-2xl">${isEarned ? '🏅' : '🔒'}</span>
+                <span class="font-bold text-xs text-slate-800 mt-1">${b.name}</span>
+                <p class="text-[10px] text-slate-500 leading-tight mt-0.5">${b.description || ''}</p>
+                <span class="text-[9px] font-semibold mt-1 px-1.5 py-0.2 rounded ${isEarned ? 'bg-amber-200 text-amber-900' : 'bg-slate-200 text-slate-600'}">
+                  ${isEarned ? 'Tercapai' : 'Terkunci'}
+                </span>
+              </div>
+            `;
+          });
+          bGrid.innerHTML = bHtml;
+        }
+      }
+    } catch {
+      showToast('Gagal memuat status gamifikasi.', 'error');
+    }
+  }
+
+  // D. Analytics Modal
+  function openAnalyticsModal() {
+    if (!checkAuthOrPrompt()) return;
+    document.getElementById('analyticsModal').classList.remove('hidden');
+    loadChartModal('mingguan');
+  }
+
+  async function loadChartModal(period) {
+    const token = getToken();
+    const container = document.getElementById('analyticsChartContainer');
+    container.innerHTML = '<div class="text-center text-xs text-slate-400 py-6">Memuat grafik analitik...</div>';
+
+    ['harian', 'mingguan', 'bulanan'].forEach(p => {
+      const cap = p.charAt(0).toUpperCase() + p.slice(1);
+      const btn = document.getElementById(`cPeriod${cap}`);
+      if (p === period) {
+        btn.className = 'px-3 py-1 rounded-lg bg-white text-teal-800 shadow-xs font-semibold';
+      } else {
+        btn.className = 'px-3 py-1 rounded-lg text-slate-600 hover:text-slate-800 font-semibold';
+      }
+    });
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/charts?period=${period}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (!data.has_data) {
+          container.innerHTML = `
+            <div class="text-center py-6 text-xs text-slate-400">
+              <span class="text-xl">📊</span>
+              <p class="mt-1 font-semibold">${data.message || 'Data belum tersedia.'}</p>
+              <p class="text-[11px] text-slate-400">Catat aktivitas Anda hari ini untuk melihat grafik tren.</p>
+            </div>
+          `;
+          return;
+        }
+
+        let html = '<div class="space-y-3">';
+        data.series.forEach(s => {
+          html += `
+            <div class="p-3 rounded-xl bg-white border border-slate-200">
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-bold text-xs text-slate-800">${s.name}</span>
+                <span class="text-[10px] text-teal-700 font-semibold">Satuan: ${s.unit}</span>
+              </div>
+              <div class="grid grid-cols-4 sm:grid-cols-7 gap-1.5 items-end text-center">
+                ${s.points.map(p => `
+                  <div class="flex flex-col items-center">
+                    <span class="text-[9px] font-bold text-teal-800">${p.value}</span>
+                    <div class="w-full bg-teal-600 rounded-t-sm" style="height: ${Math.max(12, Math.min(80, p.value * 1.5))}px;"></div>
+                    <span class="text-[9px] text-slate-400 mt-1 truncate w-12">${p.label}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+      }
+    } catch {
+      container.innerHTML = '<div class="text-center py-6 text-xs text-rose-500">Gagal mengambil data analitik.</div>';
+    }
+  }
+
+  // E. Settings Modal (Profile & Password)
+  function openSettingsModal() {
+    if (!checkAuthOrPrompt()) return;
+    document.getElementById('settingsModal').classList.remove('hidden');
+    updateUserHeaderUI();
+  }
+
+  async function handleUpdateProfile(e) {
+    e.preventDefault();
+    const token = getToken();
+    const name = document.getElementById('inputNewName').value.trim();
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/users/me`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ name })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        currentUser = data;
+        updateUserHeaderUI();
+        showToast('Nama profil berhasil diperbarui!', 'success');
+        closeModal('settingsModal');
+        await loadDashboardData();
+      } else {
+        showToast(data.detail || 'Gagal memperbarui profil.', 'error');
+      }
+    } catch {
+      showToast('Gagal menghubungi backend.', 'error');
+    }
+  }
+
+  async function handleChangePassword(e) {
+    e.preventDefault();
+    const token = getToken();
+    const old_password = document.getElementById('inputOldPass').value;
+    const new_password = document.getElementById('inputNewPass').value;
+    const confirm_new_password = document.getElementById('inputConfirmPass').value;
+
+    if (new_password !== confirm_new_password) {
+      showToast('Konfirmasi kata sandi baru tidak cocok.', 'error');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/users/change-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ old_password, new_password, confirm_new_password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast('Kata sandi berhasil diubah! Silakan gunakan sandi baru di sesi berikutnya.', 'success');
+        document.getElementById('inputOldPass').value = '';
+        document.getElementById('inputNewPass').value = '';
+        document.getElementById('inputConfirmPass').value = '';
+        closeModal('settingsModal');
+      } else {
+        showToast(data.detail || 'Gagal mengubah kata sandi.', 'error');
+      }
+    } catch {
+      showToast('Gagal menghubungi server.', 'error');
+    }
+  }
+
+  // Habits Modal View
+  function openHabitsModal() {
+    openAddTargetModal();
+  }
+
+  // 10. INITIALIZATION ON DOM READY
+  window.addEventListener('DOMContentLoaded', () => {
+    checkDbHealth();
+    const token = getToken();
+    if (token) {
+      loadDashboardData();
+    } else {
+      openAuthModal();
+    }
+  });
+</script>
+
+</body>
+</html>

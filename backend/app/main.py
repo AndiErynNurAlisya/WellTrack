@@ -1,10 +1,11 @@
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -16,6 +17,8 @@ from app.core.errors import build_validation_payload
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger("welltrack")
+
+TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 
 
 @asynccontextmanager
@@ -63,6 +66,34 @@ async def unhandled_error_handler(request: Request, exc: Exception):
 
 
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+
+
+@app.get("/", response_class=HTMLResponse, tags=["Web App"])
+def index_page():
+    dashboard_file = TEMPLATES_DIR / "dashboard.html"
+    if dashboard_file.exists():
+        return HTMLResponse(content=dashboard_file.read_text(encoding="utf-8"))
+    auth_file = TEMPLATES_DIR / "test_auth.html"
+    if auth_file.exists():
+        return HTMLResponse(content=auth_file.read_text(encoding="utf-8"))
+    return HTMLResponse(content="<h1>WellTrack API Aktif</h1><p>Buka <a href='/docs'>/docs</a></p>")
+
+
+@app.get("/dashboard", response_class=HTMLResponse, tags=["Web App"])
+def dashboard_page():
+    dashboard_file = TEMPLATES_DIR / "dashboard.html"
+    if dashboard_file.exists():
+        return HTMLResponse(content=dashboard_file.read_text(encoding="utf-8"))
+    return HTMLResponse(content="<h1>Dashboard belum ditemukan</h1>", status_code=404)
+
+
+@app.get("/auth", response_class=HTMLResponse, tags=["Web App"])
+@app.get("/test-auth", response_class=HTMLResponse, tags=["Web App"])
+def auth_page():
+    template_file = TEMPLATES_DIR / "test_auth.html"
+    if template_file.exists():
+        return HTMLResponse(content=template_file.read_text(encoding="utf-8"))
+    return HTMLResponse(content="<h1>Halaman autentikasi belum ditemukan</h1>", status_code=404)
 
 
 @app.get("/health", tags=["Health"])

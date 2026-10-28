@@ -1,3 +1,6 @@
+from collections.abc import Sequence
+from typing import Any
+
 FIELD_LABELS = {
     "name": "Nama", "email": "Email", "password": "Kata sandi",
     "confirm_password": "Konfirmasi kata sandi", "old_password": "Kata sandi lama",
@@ -83,7 +86,7 @@ def format_error(err: dict) -> dict:
     return {"field": field, "message": _cap(f"{label} {_message(err)}")}
 
 
-def build_validation_payload(raw_errors: list[dict]) -> dict:
+def build_validation_payload(raw_errors: Sequence[Any]) -> dict:
     items = [format_error(e) for e in raw_errors]
     return {
         "detail": items[0]["message"] if items else "Input tidak valid.",
