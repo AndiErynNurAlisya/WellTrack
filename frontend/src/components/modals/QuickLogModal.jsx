@@ -236,7 +236,7 @@ export default function QuickLogModal({ isOpen, onClose, initialTab = 'air' }) {
               </h2>
             </div>
             <p className="text-xs text-surface-hint mt-0.5">
-              Input ringkas dalam 3–4 langkah (NFR-11) • Zona WITA
+              Input ringkas dalam 3–4 langkah • Zona WITA
             </p>
           </div>
           <button
@@ -258,11 +258,10 @@ export default function QuickLogModal({ isOpen, onClose, initialTab = 'air' }) {
               setActiveTab('air');
               setErrorMsg('');
             }}
-            className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-2 text-xs sm:text-sm font-bold transition-all min-h-[44px] ${
-              activeTab === 'air'
+            className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-2 text-xs sm:text-sm font-bold transition-all min-h-[44px] ${activeTab === 'air'
                 ? 'bg-brand-600 text-white shadow-sm'
                 : 'text-surface-sub hover:text-surface-ink'
-            }`}
+              }`}
           >
             <Droplets className="h-4 w-4 shrink-0" />
             <span>Minum Air</span>
@@ -274,11 +273,10 @@ export default function QuickLogModal({ isOpen, onClose, initialTab = 'air' }) {
               setActiveTab('tidur');
               setErrorMsg('');
             }}
-            className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-2 text-xs sm:text-sm font-bold transition-all min-h-[44px] ${
-              activeTab === 'tidur'
+            className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-2 text-xs sm:text-sm font-bold transition-all min-h-[44px] ${activeTab === 'tidur'
                 ? 'bg-brand-600 text-white shadow-sm'
                 : 'text-surface-sub hover:text-surface-ink'
-            }`}
+              }`}
           >
             <Moon className="h-4 w-4 shrink-0" />
             <span>Pola Tidur</span>
@@ -290,11 +288,10 @@ export default function QuickLogModal({ isOpen, onClose, initialTab = 'air' }) {
               setActiveTab('aktivitas');
               setErrorMsg('');
             }}
-            className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-2 text-xs sm:text-sm font-bold transition-all min-h-[44px] ${
-              activeTab === 'aktivitas'
+            className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-2 text-xs sm:text-sm font-bold transition-all min-h-[44px] ${activeTab === 'aktivitas'
                 ? 'bg-brand-600 text-white shadow-sm'
                 : 'text-surface-sub hover:text-surface-ink'
-            }`}
+              }`}
           >
             <Activity className="h-4 w-4 shrink-0" />
             <span>Aktivitas Fisik</span>
@@ -345,11 +342,10 @@ export default function QuickLogModal({ isOpen, onClose, initialTab = 'air' }) {
                         key={preset.label}
                         type="button"
                         onClick={() => handleWaterPresetSelect(preset)}
-                        className={`flex items-center justify-center gap-1 rounded-xl px-2.5 py-2.5 text-xs font-bold border transition-all min-h-[44px] ${
-                          isSelected
+                        className={`flex items-center justify-center gap-1 rounded-xl px-2.5 py-2.5 text-xs font-bold border transition-all min-h-[44px] ${isSelected
                             ? 'bg-brand-600 text-white border-brand-600 shadow-xs'
                             : 'bg-surface-soft text-surface-ink border-transparent hover:bg-surface-muted'
-                        }`}
+                          }`}
                       >
                         {isSelected && <Check className="h-3.5 w-3.5 shrink-0" />}
                         <span>{preset.label}</span>
@@ -420,11 +416,10 @@ export default function QuickLogModal({ isOpen, onClose, initialTab = 'air' }) {
                       key={opt.id}
                       type="button"
                       onClick={() => setWaterTimeMode(opt.id)}
-                      className={`flex items-center justify-center gap-1.5 rounded-xl py-2 px-2 text-xs font-bold transition-all min-h-[44px] ${
-                        waterTimeMode === opt.id
+                      className={`flex items-center justify-center gap-1.5 rounded-xl py-2 px-2 text-xs font-bold transition-all min-h-[44px] ${waterTimeMode === opt.id
                           ? 'bg-[#85F8C4] text-[#002114]'
                           : 'bg-surface-soft text-surface-sub hover:bg-surface-muted'
-                      }`}
+                        }`}
                     >
                       <Clock className="h-3.5 w-3.5" />
                       <span>{opt.label}</span>
@@ -495,7 +490,7 @@ export default function QuickLogModal({ isOpen, onClose, initialTab = 'air' }) {
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-surface-sub">
-                        Estimasi Durasi Tidur Otomatis (FR-15)
+                        Estimasi Durasi Tidur Otomatis
                       </p>
                       <p className="text-2xl font-extrabold text-surface-ink">
                         {sleepPreview.text}{' '}
@@ -572,11 +567,10 @@ export default function QuickLogModal({ isOpen, onClose, initialTab = 'air' }) {
                         key={q.value}
                         type="button"
                         onClick={() => setSleepQuality(q.value)}
-                        className={`flex flex-col items-start rounded-xl border p-3 text-left transition-all min-h-[44px] ${
-                          isSelected
+                        className={`flex flex-col items-start rounded-xl border p-3 text-left transition-all min-h-[44px] ${isSelected
                             ? 'border-brand-600 bg-brand-50 ring-2 ring-brand-500/20'
                             : 'border-slate-200 bg-white hover:bg-surface-soft'
-                        }`}
+                          }`}
                       >
                         <span className="text-xs font-bold text-surface-ink">{q.label}</span>
                         <span className="text-[11px] text-surface-hint mt-0.5 line-clamp-1">
@@ -620,11 +614,10 @@ export default function QuickLogModal({ isOpen, onClose, initialTab = 'air' }) {
                         key={preset.value}
                         type="button"
                         onClick={() => handleActivityPresetSelect(preset)}
-                        className={`rounded-xl px-3 py-2 text-xs font-bold border transition-all min-h-[40px] ${
-                          active
+                        className={`rounded-xl px-3 py-2 text-xs font-bold border transition-all min-h-[40px] ${active
                             ? 'bg-brand-600 text-white border-brand-600 shadow-xs'
                             : 'bg-surface-soft text-surface-ink border-transparent hover:bg-surface-muted'
-                        }`}
+                          }`}
                       >
                         {preset.label}
                       </button>
@@ -633,11 +626,10 @@ export default function QuickLogModal({ isOpen, onClose, initialTab = 'air' }) {
                   <button
                     type="button"
                     onClick={() => setSelectedActivityPreset('Lainnya')}
-                    className={`rounded-xl px-3 py-2 text-xs font-bold border transition-all min-h-[40px] ${
-                      selectedActivityPreset === 'Lainnya'
+                    className={`rounded-xl px-3 py-2 text-xs font-bold border transition-all min-h-[40px] ${selectedActivityPreset === 'Lainnya'
                         ? 'bg-brand-600 text-white border-brand-600 shadow-xs'
                         : 'bg-surface-soft text-surface-ink border-transparent hover:bg-surface-muted'
-                    }`}
+                      }`}
                   >
                     + Lainnya (Ketik)
                   </button>
@@ -685,11 +677,10 @@ export default function QuickLogModal({ isOpen, onClose, initialTab = 'air' }) {
                         key={m}
                         type="button"
                         onClick={() => setDurationMinutes(String(m))}
-                        className={`rounded-lg px-2 py-1 text-[11px] font-bold transition-colors ${
-                          Number(durationMinutes) === m
+                        className={`rounded-lg px-2 py-1 text-[11px] font-bold transition-colors ${Number(durationMinutes) === m
                             ? 'bg-brand-600 text-white'
                             : 'bg-surface-soft text-surface-sub hover:bg-surface-muted'
-                        }`}
+                          }`}
                       >
                         {m}m
                       </button>
@@ -726,11 +717,10 @@ export default function QuickLogModal({ isOpen, onClose, initialTab = 'air' }) {
                         key={opt.value}
                         type="button"
                         onClick={() => setIntensity(opt.value)}
-                        className={`flex flex-col items-start rounded-xl border p-3 text-left transition-all min-h-[44px] ${
-                          active
+                        className={`flex flex-col items-start rounded-xl border p-3 text-left transition-all min-h-[44px] ${active
                             ? 'border-brand-600 bg-brand-50 ring-2 ring-brand-500/20'
                             : 'border-slate-200 bg-white hover:bg-surface-soft'
-                        }`}
+                          }`}
                       >
                         <span className="text-xs font-bold text-surface-ink">{opt.label}</span>
                         <span className="text-[11px] text-surface-hint mt-0.5 line-clamp-1">
