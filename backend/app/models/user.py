@@ -9,6 +9,7 @@ from app.models.mixins import TimestampMixin, UUIDPrimaryKeyMixin
 
 if TYPE_CHECKING:
     from app.models.activity_log import ActivityLog
+    from app.models.push_subscription import PushSubscription
     from app.models.reminder import Reminder
     from app.models.sleep_log import SleepLog
     from app.models.target import Target
@@ -49,6 +50,9 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         back_populates="user", cascade="all, delete-orphan", passive_deletes=True
     )
     reminders: Mapped[list["Reminder"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan", passive_deletes=True
+    )
+    push_subscriptions: Mapped[list["PushSubscription"]] = relationship(
         back_populates="user", cascade="all, delete-orphan", passive_deletes=True
     )
     user_badges: Mapped[list["UserBadge"]] = relationship(

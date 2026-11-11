@@ -36,6 +36,10 @@ class Settings(BaseSettings):
     APP_TIMEZONE: str = "Asia/Jakarta"
     CORS_ORIGINS: list[str] = ["http://localhost:5173"]
 
+    VAPID_PUBLIC_KEY: str = ""
+    VAPID_PRIVATE_KEY: str = ""
+    VAPID_CLAIMS_EMAIL: str = "mailto:admin@welltrack.local"
+
     @field_validator("DATABASE_URL")
     @classmethod
     def use_psycopg_driver(cls, v: str) -> str:

@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -15,6 +16,7 @@ from app.core.config import settings
 from app.core.database import engine
 from app.core.dependencies import DbSession
 from app.core.errors import build_validation_payload
+from app.core.scheduler import reminder_scheduler_loop
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger("welltrack")
@@ -25,7 +27,13 @@ FRONTEND_DIST_DIR = Path(__file__).resolve().parent.parent.parent / "frontend" /
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    scheduler_task = asyncio.create_task(reminder_scheduler_loop())
     yield
+    scheduler_task.cancel()
+    try:
+        await scheduler_task
+    except asyncio.CancelledError:
+        pass
     engine.dispose()
 
 

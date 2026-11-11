@@ -1,12 +1,19 @@
+import json
+import logging
 import uuid
 from datetime import time
 
+from pywebpush import WebPushException, webpush
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
+from app.models.push_subscription import PushSubscription
 from app.models.reminder import Reminder
 from app.models.user import User
-from app.schemas.reminder import ReminderCreate, ReminderUpdate
+from app.schemas.reminder import PushSubscriptionCreate, ReminderCreate, ReminderUpdate
+
+logger = logging.getLogger("welltrack.webpush")
 
 MAX_REMINDERS_PER_USER = 20
 
@@ -127,3 +134,88 @@ def toggle_reminder(db: Session, reminder: Reminder) -> Reminder:
 def delete_reminder(db: Session, reminder: Reminder) -> None:
     db.delete(reminder)
     db.commit()
+
+
+def save_push_subscription(
+    db: Session, user_id: uuid.UUID, data: PushSubscriptionCreate
+) -> PushSubscription:
+    sub = db.scalars(
+        select(PushSubscription).where(PushSubscription.endpoint == data.endpoint)
+    ).first()
+    if sub:
+        sub.user_id = user_id
+        sub.p256dh = data.keys.p256dh
+        sub.auth = data.keys.auth
+    else:
+        sub = PushSubscription(
+            user_id=user_id,
+            endpoint=data.endpoint,
+            p256dh=data.keys.p256dh,
+            auth=data.keys.auth,
+        )
+        db.add(sub)
+    db.commit()
+    db.refresh(sub)
+    return sub
+
+
+def delete_push_subscription_by_endpoint(
+    db: Session, user_id: uuid.UUID, endpoint: str
+) -> bool:
+    sub = db.scalars(
+        select(PushSubscription).where(
+            PushSubscription.user_id == user_id,
+            PushSubscription.endpoint == endpoint,
+        )
+    ).first()
+    if sub:
+        db.delete(sub)
+        db.commit()
+        return True
+    return False
+
+
+def get_user_push_subscriptions(
+    db: Session, user_id: uuid.UUID
+) -> list[PushSubscription]:
+    return list(
+        db.scalars(
+            select(PushSubscription).where(PushSubscription.user_id == user_id)
+        )
+    )
+
+
+def send_push_to_subscription(
+    db: Session, subscription: PushSubscription, payload: dict
+) -> bool:
+    if not settings.VAPID_PRIVATE_KEY or not settings.VAPID_PUBLIC_KEY:
+        logger.warning("VAPID keys not configured. Skipping push notification.")
+        return False
+    try:
+        sub_info = {
+            "endpoint": subscription.endpoint,
+            "keys": {
+                "p256dh": subscription.p256dh,
+                "auth": subscription.auth,
+            },
+        }
+        webpush(
+            subscription_info=sub_info,
+            data=json.dumps(payload),
+            vapid_private_key=settings.VAPID_PRIVATE_KEY,
+            vapid_claims={"sub": settings.VAPID_CLAIMS_EMAIL},
+        )
+        return True
+    except WebPushException as ex:
+        logger.warning("WebPush failed: %s", ex)
+        if ex.response is not None and ex.response.status_code in (404, 410):
+            logger.info("Subscription is expired or gone. Deleting: %s", subscription.endpoint)
+            try:
+                db.delete(subscription)
+                db.commit()
+            except Exception:
+                db.rollback()
+        return False
+    except Exception as e:
+        logger.exception("Unexpected error sending webpush: %s", e)
+        return False
