@@ -5,7 +5,8 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -19,6 +20,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 logger = logging.getLogger("welltrack")
 
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
+FRONTEND_DIST_DIR = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
 
 
 @asynccontextmanager
@@ -67,33 +69,56 @@ async def unhandled_error_handler(request: Request, exc: Exception):
 
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
+if (FRONTEND_DIST_DIR / "assets").exists():
+    app.mount("/assets", StaticFiles(directory=FRONTEND_DIST_DIR / "assets"), name="frontend-assets")
 
-@app.get("/", response_class=HTMLResponse, tags=["Web App"])
-def index_page():
-    dashboard_file = TEMPLATES_DIR / "dashboard.html"
-    if dashboard_file.exists():
-        return HTMLResponse(content=dashboard_file.read_text(encoding="utf-8"))
-    auth_file = TEMPLATES_DIR / "test_auth.html"
-    if auth_file.exists():
-        return HTMLResponse(content=auth_file.read_text(encoding="utf-8"))
+
+def _render_spa_or_template(default_template: str = "dashboard.html"):
+    dist_index = FRONTEND_DIST_DIR / "index.html"
+    if dist_index.exists():
+        return HTMLResponse(content=dist_index.read_text(encoding="utf-8"))
+    template_file = TEMPLATES_DIR / default_template
+    if template_file.exists():
+        return HTMLResponse(content=template_file.read_text(encoding="utf-8"))
     return HTMLResponse(content="<h1>WellTrack API Aktif</h1><p>Buka <a href='/docs'>/docs</a></p>")
 
 
+@app.get("/logo-icon.svg", include_in_schema=False)
+def serve_logo_icon():
+    icon_file = FRONTEND_DIST_DIR / "logo-icon.svg"
+    if icon_file.exists():
+        return FileResponse(icon_file)
+    return HTMLResponse(status_code=404)
+
+
+@app.get("/logo-text.svg", include_in_schema=False)
+def serve_logo_text():
+    text_file = FRONTEND_DIST_DIR / "logo-text.svg"
+    if text_file.exists():
+        return FileResponse(text_file)
+    return HTMLResponse(status_code=404)
+
+
+@app.get("/", response_class=HTMLResponse, tags=["Web App"])
+def index_page():
+    return _render_spa_or_template("dashboard.html")
+
+
 @app.get("/dashboard", response_class=HTMLResponse, tags=["Web App"])
-def dashboard_page():
-    dashboard_file = TEMPLATES_DIR / "dashboard.html"
-    if dashboard_file.exists():
-        return HTMLResponse(content=dashboard_file.read_text(encoding="utf-8"))
-    return HTMLResponse(content="<h1>Dashboard belum ditemukan</h1>", status_code=404)
+@app.get("/login", response_class=HTMLResponse, tags=["Web App"])
+@app.get("/register", response_class=HTMLResponse, tags=["Web App"])
+@app.get("/targets", response_class=HTMLResponse, tags=["Web App"])
+@app.get("/analytics", response_class=HTMLResponse, tags=["Web App"])
+@app.get("/gamification", response_class=HTMLResponse, tags=["Web App"])
+@app.get("/profile", response_class=HTMLResponse, tags=["Web App"])
+def spa_routes():
+    return _render_spa_or_template("dashboard.html")
 
 
 @app.get("/auth", response_class=HTMLResponse, tags=["Web App"])
 @app.get("/test-auth", response_class=HTMLResponse, tags=["Web App"])
 def auth_page():
-    template_file = TEMPLATES_DIR / "test_auth.html"
-    if template_file.exists():
-        return HTMLResponse(content=template_file.read_text(encoding="utf-8"))
-    return HTMLResponse(content="<h1>Halaman autentikasi belum ditemukan</h1>", status_code=404)
+    return _render_spa_or_template("test_auth.html")
 
 
 @app.get("/health", tags=["Health"])

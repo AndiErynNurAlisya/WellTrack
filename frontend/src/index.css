@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    overflow-x: hidden;
+    max-width: 100vw;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #F8F9FF;
+    color: #0B1C30;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 min-h-[44px];
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-surface-soft px-4 py-2.5 text-sm font-semibold text-brand-700 border border-surface-accent/60 transition-all hover:bg-surface-muted active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 min-h-[44px];
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-[#BA1A1A] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#93000A] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 min-h-[44px];
+  }
+
+  .input-field {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-surface-ink placeholder:text-surface-hint focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all min-h-[44px];
+  }
+
+  .card-surface {
+    @apply rounded-2xl bg-white border border-slate-100 shadow-card;
+  }
+}
+
