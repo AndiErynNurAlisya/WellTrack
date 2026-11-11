@@ -236,7 +236,6 @@ export default function QuickLogModal({ isOpen, onClose, initialTab = 'air' }) {
               </h2>
             </div>
             <p className="text-xs text-surface-hint mt-0.5">
-              Input ringkas dalam 3–4 langkah • Zona WITA
             </p>
           </div>
           <button
@@ -490,7 +489,7 @@ export default function QuickLogModal({ isOpen, onClose, initialTab = 'air' }) {
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-surface-sub">
-                        Estimasi Durasi Tidur Otomatis
+
                       </p>
                       <p className="text-2xl font-extrabold text-surface-ink">
                         {sleepPreview.text}{' '}

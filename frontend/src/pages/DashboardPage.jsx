@@ -138,7 +138,7 @@ export default function DashboardPage() {
           log_time: getCurrentTimeString(true),
           amount: Number(widgetWaterMl),
           unit: 'ml',
-          notes: 'Dicatat via Catat Cepat Cerdas',
+          notes: 'Dicatat via Catat Cepat ',
         });
         syncUserStats(res.gamification);
         showGamificationFeedback(`Minum air ${widgetWaterMl} ml`, res.gamification);
@@ -158,7 +158,7 @@ export default function DashboardPage() {
           sleep_start_time: ensureTimeWithSeconds(widgetSleepStart),
           sleep_end_time: ensureTimeWithSeconds(widgetSleepEnd),
           quality: widgetSleepQuality,
-          notes: 'Dicatat via Catat Cepat Cerdas',
+          notes: 'Dicatat via Catat Cepat ',
         });
         syncUserStats(res.gamification);
         showGamificationFeedback(`Tidur (${preview.text})`, res.gamification);
@@ -169,7 +169,7 @@ export default function DashboardPage() {
           activity_date: todayDate,
           duration_minutes: mins,
           intensity: widgetActivityIntensity,
-          notes: 'Dicatat via Catat Cepat Cerdas',
+          notes: 'Dicatat via Catat Cepat ',
         });
         syncUserStats(res.gamification);
         showGamificationFeedback(`${widgetActivityType} (${mins} mnt)`, res.gamification);
@@ -651,14 +651,14 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Right (5 cols): Widget "Catat Cepat Cerdas" (Sesuai Figma Dashboard) */}
+        {/* Right (5 cols): Widget "Catat Cepat " (Sesuai Figma Dashboard) */}
         <div className="lg:col-span-5 card-surface p-5 sm:p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full bg-brand-600" />
                 <h2 className="text-base sm:text-lg font-extrabold text-surface-ink">
-                  Catat Cepat Cerdas
+                  Catat Cepat 
                 </h2>
               </div>
               <span className="rounded-lg bg-surface-soft px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-surface-sub">

@@ -497,7 +497,7 @@ export default function ProfileSettingsPage() {
                 </h2>
                 <p className="text-xs text-surface-sub mt-0.5">
                   Perbarui nama tampilan dan pilih avatar profil menarik atau gunakan tautan foto
-                  Anda sendiri (FR-04).
+                  Anda sendiri .
                 </p>
               </div>
 
@@ -728,7 +728,7 @@ export default function ProfileSettingsPage() {
                   </h2>
                   <p className="text-xs text-surface-sub mt-0.5">
                     Atur jadwal pengingat untuk minum air, pola tidur, aktivitas fisik, atau target
-                    harian (FR-30 s.d. FR-32).
+                    harian.
                   </p>
                 </div>
 
