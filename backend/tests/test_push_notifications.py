@@ -37,7 +37,7 @@ def test_push_subscription_schema_valid():
     assert sub.keys.auth == "sample_auth_token"
 
 
-def test_push_subscription_schema_tanpa_endpoint_invalid():
+def test_push_subscription_schema_tanpa_endpoint_invalid():=
     # Field endpoint wajib ada (tidak boleh dihilangkan)
     with pytest.raises(ValidationError):
         PushSubscriptionCreate.model_validate(
