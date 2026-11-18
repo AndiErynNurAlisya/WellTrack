@@ -158,6 +158,10 @@ export const reminderApi = {
   update: (id, payload) => apiClient.patch(`/reminders/${id}`, payload).then((r) => r.data),
   toggle: (id) => apiClient.post(`/reminders/${id}/toggle`).then((r) => r.data),
   remove: (id) => apiClient.delete(`/reminders/${id}`),
+  getVapidPublicKey: () => apiClient.get('/reminders/vapid-public-key').then((r) => r.data),
+  subscribePush: (payload) => apiClient.post('/reminders/subscribe', payload).then((r) => r.data),
+  unsubscribePush: (endpoint) => apiClient.post('/reminders/unsubscribe', null, { params: { endpoint } }),
+  testPush: () => apiClient.post('/reminders/test-push').then((r) => r.data),
 };
 
 export default apiClient;

@@ -36,6 +36,7 @@ import {
   formatDateIndo,
 } from '../utils/dateUtils';
 import { parseApiError } from '../utils/errorParser';
+import { getExistingPushSubscription, subscribeToWebPush } from '../utils/webPush';
 import UserAvatar from '../components/common/UserAvatar';
 import ConfirmDialog from '../components/modals/ConfirmDialog';
 
@@ -195,6 +196,17 @@ export default function ProfileSettingsPage() {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  // Web Push Notification State
+  const [isSubscribedPush, setIsSubscribedPush] = useState(false);
+  const [isPushSubscribing, setIsPushSubscribing] = useState(false);
+  const [isTestingPush, setIsTestingPush] = useState(false);
+
+  useEffect(() => {
+    getExistingPushSubscription().then((sub) => {
+      setIsSubscribedPush(Boolean(sub));
+    });
+  }, []);
+
   const fetchReminders = useCallback(async () => {
     setIsLoadingReminders(true);
     setReminderError('');
@@ -304,27 +316,46 @@ export default function ProfileSettingsPage() {
   };
 
   const handleRequestBrowserNotification = async () => {
-    if (!('Notification' in window)) {
-      showToast({
-        type: 'info',
-        title: 'Notifikasi In-App Aktif',
-        message: 'Browser ini tidak mendukung Web Notification API, pengingat tetap muncul di dalam aplikasi.',
-      });
-      return;
-    }
-    const perm = await Notification.requestPermission();
-    if (perm === 'granted') {
+    setIsPushSubscribing(true);
+    try {
+      await subscribeToWebPush();
+      setIsSubscribedPush(true);
       showToast({
         type: 'success',
-        title: 'Izin Notifikasi Aktif!',
-        message: 'WellTrack akan menampilkan notifikasi pada jam pengingat yang Anda atur.',
+        title: 'Notifikasi Latar Belakang Aktif! 🔔',
+        message: 'WellTrack kini dapat mengirimkan pengingat ke perangkat Anda meskipun tab web ditutup.',
+        duration: 8000,
       });
-    } else {
+    } catch (err) {
+      const msg = err.message || 'Gagal mengaktifkan notifikasi latar belakang.';
       showToast({
-        type: 'info',
-        title: 'Pengingat In-App Aktif',
-        message: 'Pengingat akan tetap muncul sebagai banner di dalam aplikasi WellTrack.',
+        type: 'error',
+        title: 'Izin Notifikasi',
+        message: msg,
       });
+    } finally {
+      setIsPushSubscribing(false);
+    }
+  };
+
+  const handleTestPush = async () => {
+    setIsTestingPush(true);
+    try {
+      const res = await reminderApi.testPush();
+      showToast({
+        type: 'success',
+        title: 'Tes Terkirim!',
+        message: res.detail || 'Notifikasi uji coba berhasil dikirim. Cek layar Anda.',
+      });
+    } catch (err) {
+      const parsed = parseApiError(err, 'Gagal mengirim notifikasi tes.');
+      showToast({
+        type: 'error',
+        title: 'Gagal Tes Notifikasi',
+        message: parsed.message,
+      });
+    } finally {
+      setIsTestingPush(false);
     }
   };
 
@@ -732,14 +763,45 @@ export default function ProfileSettingsPage() {
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleRequestBrowserNotification}
-                  className="btn-secondary text-xs self-start sm:self-auto"
-                >
-                  <BellRing className="h-4 w-4" />
-                  <span>Aktifkan Notifikasi Browser</span>
-                </button>
+                <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                  {isSubscribedPush && (
+                    <button
+                      type="button"
+                      onClick={handleTestPush}
+                      disabled={isTestingPush}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-brand-500/40 bg-brand-50 px-3 py-2 text-xs font-bold text-brand-700 hover:bg-brand-100 transition-colors disabled:opacity-50"
+                    >
+                      {isTestingPush ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-3.5 w-3.5" />
+                      )}
+                      <span>Kirim Tes Notifikasi</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleRequestBrowserNotification}
+                    disabled={isPushSubscribing}
+                    className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
+                      isSubscribedPush
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        : 'btn-secondary'
+                    }`}
+                  >
+                    {isPushSubscribing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <BellRing className="h-4 w-4" />
+                    )}
+                    <span>
+                      {isSubscribedPush
+                        ? '✓ Notifikasi Latar Belakang Aktif'
+                        : 'Aktifkan Notifikasi Latar Belakang'}
+                    </span>
+                  </button>
+                </div>
               </div>
 
               {reminderError && (
