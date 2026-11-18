@@ -40,6 +40,7 @@ import {
   ensureTimeWithSeconds,
   extractHHMM,
   formatDateIndo,
+  formatDateInZone,
   formatMinutesToHours,
   formatNumberId,
   getCurrentTimeString,
@@ -228,6 +229,33 @@ export default function DashboardPage() {
     : 30;
   const activityPct = Math.min(100, Math.round((activityTotalMins / (activityGoalMins || 30)) * 100));
 
+  const activeSleepTarget = activeTargets.find(
+    (t) => t.category === 'tidur' && t.frequency === 'harian'
+  );
+  const sleepGoalMins = activeSleepTarget
+    ? activeSleepTarget.unit === 'jam'
+      ? Number(activeSleepTarget.target_value) * 60
+      : Number(activeSleepTarget.target_value)
+    : 480;
+
+  const currentTodayStr = dashboard?.today || getTodayDateString();
+  let sleepEndDateStr = null;
+  if (lastSleep?.sleep_end) {
+    try {
+      sleepEndDateStr = formatDateInZone(new Date(lastSleep.sleep_end));
+    } catch {
+      sleepEndDateStr = String(lastSleep.sleep_end).slice(0, 10);
+    }
+  } else {
+    sleepEndDateStr = lastSleep?.sleep_date;
+  }
+
+  const isSleepLoggedToday = Boolean(
+    lastSleep && (lastSleep.sleep_date === currentTodayStr || sleepEndDateStr === currentTodayStr)
+  );
+  const todaySleepMinutes = isSleepLoggedToday ? (lastSleep?.duration_minutes || 0) : 0;
+  const sleepPct = Math.min(100, Math.round((todaySleepMinutes / (sleepGoalMins || 480)) * 100));
+
   const completedTargetsCount = activeTargets.filter((t) => t.progress?.completed).length;
 
   // Siapkan data grafik harian 7 hari terakhir
@@ -391,49 +419,96 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Card 2: Kualitas & Pola Tidur Terakhir */}
+        {/* Card 2: Kualitas & Pola Tidur Hari Ini */}
         <div className="card-surface p-5 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#D3E4FE]/70 text-[#0B1C30]">
                 <Moon className="h-5 w-5" />
               </div>
-              <span className="rounded-full bg-[#85F8C4]/50 px-3 py-1 text-xs font-extrabold text-[#005137] capitalize">
-                {lastSleep?.quality ? `Kualitas: ${lastSleep.quality}` : 'Pola Tidur'}
-              </span>
+              {isSleepLoggedToday ? (
+                <span className="rounded-full bg-[#85F8C4]/50 px-3 py-1 text-xs font-extrabold text-[#005137] capitalize">
+                  {lastSleep?.quality ? `Kualitas: ${lastSleep.quality}` : `${sleepPct}% Target`}
+                </span>
+              ) : (
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500">
+                  Belum Dicatat
+                </span>
+              )}
             </div>
 
             <p className="mt-4 text-[11px] font-extrabold uppercase tracking-wider text-surface-sub">
-              Catatan Tidur Terakhir
+              Pola Tidur Hari Ini
             </p>
 
-            {lastSleep ? (
+            {isSleepLoggedToday ? (
               <>
-                <div className="mt-1 flex items-baseline gap-2">
-                  <span className="text-3xl font-extrabold text-surface-ink">
-                    {formatMinutesToHours(lastSleep.duration_minutes)}
-                  </span>
-                  <span className="text-xs font-bold text-brand-600">
-                    ({lastSleep.duration_minutes} menit)
+                <div className="mt-1 flex items-baseline justify-between">
+                  <div className="flex items-baseline">
+                    <span className="text-3xl font-extrabold text-surface-ink">
+                      {formatMinutesToHours(todaySleepMinutes)}
+                    </span>
+                    <span className="text-sm font-bold text-surface-hint ml-1">
+                      / {Math.round((sleepGoalMins / 60) * 10) / 10} jam
+                    </span>
+                  </div>
+                  <span className="text-xs font-bold text-[#006A61]">
+                    {todaySleepMinutes} menit
                   </span>
                 </div>
-                <p className="mt-1.5 text-xs font-medium text-surface-sub">
-                  🕒 {extractHHMM(lastSleep.sleep_start)} – {extractHHMM(lastSleep.sleep_end)} WITA •{' '}
-                  {formatDateIndo(lastSleep.sleep_date, { shortMonth: true })}
-                </p>
-                <div className="mt-3 h-2 w-full rounded-full bg-surface-soft overflow-hidden">
+
+                <div className="mt-2.5 h-2 w-full rounded-full bg-surface-soft overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-brand-600 transition-all duration-500"
-                    style={{
-                      width: `${Math.min(100, Math.round((lastSleep.duration_minutes / 480) * 100))}%`,
-                    }}
+                    className="h-full rounded-full bg-[#006A61] transition-all duration-500"
+                    style={{ width: `${sleepPct}%` }}
                   />
                 </div>
+
+                <p className="mt-2 text-xs font-semibold text-brand-600">
+                  {todaySleepMinutes >= sleepGoalMins
+                    ? 'Target tidur harian telah tercapai!'
+                    : `Kurang ${formatMinutesToHours(sleepGoalMins - todaySleepMinutes)} lagi`}
+                </p>
+                <p className="mt-0.5 text-[11px] text-surface-sub">
+                  🕒 {extractHHMM(lastSleep.sleep_start)} – {extractHHMM(lastSleep.sleep_end)} WITA
+                </p>
               </>
             ) : (
-              <div className="mt-3 rounded-xl bg-surface-soft p-3 text-xs text-surface-sub">
-                Belum ada catatan tidur. Catat jam mulai tidur & jam bangun Anda hari ini.
-              </div>
+              <>
+                <div className="mt-1 flex items-baseline justify-between">
+                  <div className="flex items-baseline">
+                    <span className="text-3xl font-extrabold text-surface-ink">
+                      0 jam
+                    </span>
+                    <span className="text-sm font-bold text-surface-hint ml-1">
+                      / {Math.round((sleepGoalMins / 60) * 10) / 10} jam
+                    </span>
+                  </div>
+                  <span className="text-xs font-bold text-surface-hint">
+                    0 menit
+                  </span>
+                </div>
+
+                <div className="mt-2.5 h-2 w-full rounded-full bg-surface-soft overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-[#006A61] transition-all duration-500"
+                    style={{ width: '0%' }}
+                  />
+                </div>
+
+                <p className="mt-2 text-xs font-semibold text-slate-500">
+                  {sleepGoalMins / 60} jam lagi menuju sasaran harian
+                </p>
+                <p className="mt-0.5 text-[11px] text-surface-sub truncate">
+                  {lastSleep ? (
+                    <span>
+                      Terakhir dicatat: {formatMinutesToHours(lastSleep.duration_minutes)} ({formatDateIndo(lastSleep.sleep_date, { shortMonth: true })})
+                    </span>
+                  ) : (
+                    'Belum ada riwayat tidur tercatat.'
+                  )}
+                </p>
+              </>
             )}
           </div>
 
@@ -444,7 +519,7 @@ export default function DashboardPage() {
               className="btn-secondary w-full py-2 text-xs font-bold"
             >
               <Plus className="h-4 w-4" />
-              <span>Catat Jam Tidur</span>
+              <span>{isSleepLoggedToday ? 'Perbarui Jam Tidur' : 'Catat Jam Tidur'}</span>
             </button>
           </div>
         </div>

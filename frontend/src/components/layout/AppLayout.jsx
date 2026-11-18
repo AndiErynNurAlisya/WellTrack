@@ -25,11 +25,11 @@ import QuickLogModal from '../modals/QuickLogModal';
 import ConfirmDialog from '../modals/ConfirmDialog';
 
 const NAV_ITEMS = [
-  { to: '/dashboard', label: 'Dashboard / Overview', shortLabel: 'Beranda', icon: LayoutDashboard },
-  { to: '/analytics', label: 'Analytics & Progress', shortLabel: 'Analitik', icon: BarChart3 },
-  { to: '/targets', label: 'Habits & Goals', shortLabel: 'Target', icon: CheckCircle2 },
-  { to: '/gamification', label: 'Gamification & Rewards', shortLabel: 'Prestasi', icon: Award },
-  { to: '/settings', label: 'Profile & Settings', shortLabel: 'Profil', icon: Settings },
+  { to: '/dashboard', label: 'Dasbor / Ringkasan', shortLabel: 'Dasbor', icon: LayoutDashboard },
+  { to: '/analytics', label: 'Analitik & Progres', shortLabel: 'Analitik', icon: BarChart3 },
+  { to: '/targets', label: 'Kebiasaan & Target', shortLabel: 'Target', icon: CheckCircle2 },
+  { to: '/gamification', label: 'Gamifikasi & Prestasi', shortLabel: 'Prestasi', icon: Award },
+  { to: '/settings', label: 'Profil & Pengaturan', shortLabel: 'Profil', icon: Settings },
 ];
 
 export default function AppLayout() {

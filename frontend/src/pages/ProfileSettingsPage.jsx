@@ -464,8 +464,8 @@ export default function ProfileSettingsPage() {
                 type="button"
                 onClick={() => handleSelectTab(item.id)}
                 className={`w-full flex items-center justify-between gap-3 rounded-2xl p-3.5 text-left transition-all min-h-[54px] ${active
-                    ? 'bg-brand-600 text-white shadow-sm'
-                    : 'text-surface-ink hover:bg-surface-soft'
+                  ? 'bg-brand-600 text-white shadow-sm'
+                  : 'text-surface-ink hover:bg-surface-soft'
                   }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
@@ -553,8 +553,8 @@ export default function ProfileSettingsPage() {
                           type="button"
                           onClick={() => setPhotoUrl(preset.url)}
                           className={`group relative flex flex-col items-center rounded-2xl p-2 border transition-all ${isSelected
-                              ? 'border-brand-600 bg-brand-50 ring-2 ring-brand-500/20'
-                              : 'border-slate-200 bg-surface-soft/50 hover:bg-surface-soft'
+                            ? 'border-brand-600 bg-brand-50 ring-2 ring-brand-500/20'
+                            : 'border-slate-200 bg-surface-soft/50 hover:bg-surface-soft'
                             }`}
                           title={preset.label}
                         >
@@ -784,11 +784,10 @@ export default function ProfileSettingsPage() {
                     type="button"
                     onClick={handleRequestBrowserNotification}
                     disabled={isPushSubscribing}
-                    className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
-                      isSubscribedPush
+                    className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${isSubscribedPush
                         ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                         : 'btn-secondary'
-                    }`}
+                      }`}
                   >
                     {isPushSubscribing ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -938,15 +937,15 @@ export default function ProfileSettingsPage() {
                       <div
                         key={rem.id}
                         className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl p-4 border transition-all ${rem.is_active
-                            ? 'bg-white border-emerald-200 shadow-2xs'
-                            : 'bg-slate-50 border-slate-200 opacity-75'
+                          ? 'bg-white border-emerald-200 shadow-2xs'
+                          : 'bg-slate-50 border-slate-200 opacity-75'
                           }`}
                       >
                         <div className="flex items-start sm:items-center gap-3.5">
                           <div
                             className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl font-extrabold text-xs ${rem.is_active
-                                ? 'bg-[#85F8C4]/60 text-[#005137]'
-                                : 'bg-slate-200 text-slate-600'
+                              ? 'bg-[#85F8C4]/60 text-[#005137]'
+                              : 'bg-slate-200 text-slate-600'
                               }`}
                           >
                             {timeHHMM}
@@ -1045,7 +1044,7 @@ export default function ProfileSettingsPage() {
         onClose={() => setLogoutOpen(false)}
         onConfirm={handleConfirmLogout}
         title="Keluar dari Akun WellTrack?"
-        description="Token autentikasi Anda akan dihapus sepenuhnya dari browser ini sesuai standar keamanan (NFR-07)."
+        description="Token autentikasi Anda akan dihapus sepenuhnya dari browser ini sesuai standar keamanan"
         confirmText="Ya, Keluar Sekarang"
         cancelText="Batal"
         variant="danger"
