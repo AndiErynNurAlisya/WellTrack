@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from sqlalchemy import select
+from sqlalchemy import select, delete
 
 from app.core.database import SessionLocal
 from app.models import Badge, TargetTemplate
@@ -23,23 +23,27 @@ TEMPLATES = [
 ]
 
 BADGES = [
-    dict(name="First Step", description="Mencatat log kesehatan pertama.",
+    dict(name="Langkah Pertama", description="Mencatat log kesehatan pertama.",
          criteria_type="total_logs", criteria_value=1),
-    dict(name="Active User", description="Mencatat 30 log kesehatan.",
+    dict(name="Pengguna Aktif", description="Mencatat 30 log kesehatan.",
          criteria_type="total_logs", criteria_value=30),
-    dict(name="Badge Expert", description="Mencatat 100 log kesehatan.",
+    dict(name="Ahli Lencana", description="Mencatat 100 log kesehatan.",
          criteria_type="total_logs", criteria_value=100),
-    dict(name="Consistent User", description="Streak 7 hari berturut-turut.",
+    dict(name="Pengguna Konsisten", description="Streak 7 hari berturut-turut.",
          criteria_type="streak", criteria_value=7),
-    dict(name="Streak Master", description="Streak 30 hari berturut-turut.",
+    dict(name="Jagoan Streak", description="Streak 30 hari berturut-turut.",
          criteria_type="streak", criteria_value=30),
-    dict(name="Target Achiever", description="Menyelesaikan 1 target kesehatan.",
+    dict(name="Pencapai Target", description="Menyelesaikan 1 target kesehatan.",
          criteria_type="target_completed", criteria_value=1),
 ]
 
 
 def seed() -> None:
     with SessionLocal() as db:
+        # Menghapus badge lama agar tidak terjadi duplikat bahasa Inggris & Indonesia
+        db.execute(delete(Badge))
+        db.commit()
+
         existing_templates = set(db.scalars(select(TargetTemplate.name)))
         existing_badges = set(db.scalars(select(Badge.name)))
 
