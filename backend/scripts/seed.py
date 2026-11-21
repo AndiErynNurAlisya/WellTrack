@@ -40,10 +40,6 @@ BADGES = [
 
 def seed() -> None:
     with SessionLocal() as db:
-        # Menghapus badge lama agar tidak terjadi duplikat bahasa Inggris & Indonesia
-        db.execute(delete(Badge))
-        db.commit()
-
         existing_templates = set(db.scalars(select(TargetTemplate.name)))
         existing_badges = set(db.scalars(select(Badge.name)))
 
